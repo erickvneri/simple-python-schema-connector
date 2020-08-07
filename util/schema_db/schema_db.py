@@ -142,10 +142,8 @@ class SchemaDB:
         # user id and return respective
         # devices.
         user_id_query = \
-            'SELECT user_id FROM USER_INFO ' + \
-            'LEFT JOIN TOKEN_INFO ' + \
-            'ON USER_INFO.id=TOKEN_INFO.user_id ' + \
-            'WHERE TOKEN_INFO.access_token="%s"' % param
+            'SELECT user_id FROM TOKEN_INFO ' + \
+            'WHERE access_token="%s"' % param
         devices_query = \
             'SELECT * FROM DEVICE_INFO ' + \
             'WHERE user_id=(%s)' % user_id_query
