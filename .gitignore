@@ -138,3 +138,4 @@ dmypy.json
 
 # local db
 schema_connector_db.sqlite
+fetching.py
