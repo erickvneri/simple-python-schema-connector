@@ -24,7 +24,6 @@ class DeviceProv:
     def poll_by_device_id(self, id_list: list) -> list:
         # DB List of Results
         fetch_result = db.prov_device_poll(id_list)
-        print(fetch_result)
         # Elaborate SchemaDevice instances
         devices = [SchemaDevice(_id) for _id in id_list]
         # Iteration to filter
