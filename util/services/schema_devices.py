@@ -34,11 +34,11 @@ class DeviceProv:
                 s_index += 1
             else:
                 devices[d_id].set_state(
-                    fetch_result[s_index][3],
-                    fetch_result[s_index][4],
-                    fetch_result[s_index][5],
-                    fetch_result[s_index][6],
-                    fetch_result[s_index][7]
+                    fetch_result[s_index][3],  # capability
+                    fetch_result[s_index][4],  # attribute
+                    fetch_result[s_index][5],  # value
+                    fetch_result[s_index][6],  # unit
+                    fetch_result[s_index][7]   # component
                 )
                 s_index += 1
             if s_index == len(fetch_result):
