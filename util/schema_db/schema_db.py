@@ -117,6 +117,8 @@ class SchemaDB:
             'capability VARCHAR,' + \
             'attribute VARCHAR,' + \
             'value VARCHAR,' + \
+            'unit VARCHAR,' + \
+            'component VARCHAR,' + \
             'FOREIGN KEY (device_id) REFERENCES DEVICE_INFO(id))'
         cursor = database.cursor()
         cursor.execute(poll_table_query)
@@ -150,6 +152,31 @@ class SchemaDB:
         data = cursor.execute(devices_query)
         return data.fetchall()
 
+    def prov_device_poll(self, id_list: list):
+        """
+        prov_devices_poll is invoked while
+        gathering response data for Schema
+        State Refresh or Command Requests.
+        """
+        try:
+            db = sqlite3.connect(self.DB_URL)
+        except OperationalError as e:
+            logging.warning(e)
+        else:
+            cursor = db.cursor()
+            return self._prov_device_poll(cursor, id_list)
+
+    @staticmethod
+    def _prov_device_poll(*info):
+        cursor, id_list = info
+        # Fron list of ids, return
+        # filtered results.
+        poll_query = \
+            'SELECT * FROM POLL_INFO ' + \
+            'WHERE device_id ' + \
+            'IN {}'.format(tuple(id_list))
+        data = cursor.execute(poll_query)
+        return data.fetchall()
 
 #############################################################
 #############################################################
@@ -182,14 +209,27 @@ class SchemaDB:
 
     @staticmethod
     def _devices_mock_inserts(database):
-        from random import randint
+        from random import randint, choice
         cursor = database.cursor()
         cursor.execute('DELETE FROM DEVICE_INFO')
+        cursor.execute('DELETE FROM POLL_INFO')
         for i in range(1, 1000):
+            # Devices query
             q_device = \
                 'INSERT INTO DEVICE_INFO' + \
                 '(id,user_id,label,device_handler,mn,model) ' + \
                 'VALUES ' + \
                 '("x%s", %i, "device_%s","c2c-switch","MNMN","MODEL")' % (i,randint(1,200),i)
             cursor.execute(q_device)
+            # Poll query
+            q_poll = \
+                'INSERT INTO POLL_INFO' + \
+                '(device_id,poll_date,capability,attribute,value,component) ' + \
+                'VALUES' + \
+                '("x%s","%s","switch","switch","%s","%s")' \
+                % (i,datetime.now(),choice(['on','off']),choice(['main','secondary']))
+            q_poll += \
+                ',("x%s", "%s", "healthCheck","healthStatus","%s","%s")' \
+                % (i,datetime.now(),choice(['online','offline']),choice(['main','secondary']))
+            cursor.execute(q_poll)
 
