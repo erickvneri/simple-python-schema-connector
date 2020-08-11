@@ -1,1 +1,2 @@
-from .schema_devices import DeviceProv
+from .schema_devices import DeviceProvider
+

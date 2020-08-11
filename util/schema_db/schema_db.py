@@ -152,7 +152,7 @@ class SchemaDB:
         data = cursor.execute(devices_query)
         return data.fetchall()
 
-    def prov_device_poll(self, id_list: list):
+    def polling_device(self, id_list: list, poll_data: dict=None):
         """
         prov_devices_poll is invoked while
         gathering response data for Schema
@@ -164,19 +164,48 @@ class SchemaDB:
             logging.warning(e)
         else:
             cursor = db.cursor()
-            return self._prov_device_poll(cursor, id_list)
+            if not poll_data:
+                return self._get_device_status(cursor, id_list)
+            else:
+                return self._put_device_status(cursor, id_list, poll_data)
 
     @staticmethod
-    def _prov_device_poll(*info):
+    def _get_device_status(*info):
+        # Output poll
         cursor, id_list = info
-        # Fron list of ids, return
+        # From list of ids, return
         # filtered results.
+        if len(id_list) > 1:
+            condition = 'IN '.format(tuple(id_list))
+        else:
+            condition = '="%s"' % id_list[0]
+        # Elaborate Base query
         poll_query = \
             'SELECT * FROM POLL_INFO ' + \
             'WHERE device_id ' + \
-            'IN {}'.format(tuple(id_list))
+            condition #filtered condition
+        # Execute query
         data = cursor.execute(poll_query)
         return data.fetchall()
+
+    @staticmethod
+    def _put_device_status(*info):
+        # Input poll
+        cursor, device_id, data = info
+        # Update POLL_INFO table based
+        # on the device_id passed.
+        poll_query = \
+            'UPDATE POLL_INFO ' + \
+            'SET ' + \
+            'value="%s",' % data['value'] + \
+            'poll_date="%s" ' % str(datetime.now()) + \
+            'WHERE ' + \
+            'device_id="%s" ' % device_id[0] + \
+            'AND ' + \
+            'capability="%s"' % data['capability']
+        # Execute query
+        cursor.execute(poll_query)
+
 
 #############################################################
 #############################################################
@@ -226,10 +255,10 @@ class SchemaDB:
                 'INSERT INTO POLL_INFO' + \
                 '(device_id,poll_date,capability,attribute,value,component) ' + \
                 'VALUES' + \
-                '("x%s","%s","switch","switch","%s","%s")' \
+                '("x%s","%s","st.switch","switch","%s","%s")' \
                 % (i,datetime.now(),choice(['on','off']),choice(['main','secondary']))
             q_poll += \
-                ',("x%s", "%s", "healthCheck","healthStatus","%s","%s")' \
+                ',("x%s", "%s", "st.healthCheck","healthStatus","%s","%s")' \
                 % (i,datetime.now(),choice(['online','offline']),choice(['main','secondary']))
             cursor.execute(q_poll)
 

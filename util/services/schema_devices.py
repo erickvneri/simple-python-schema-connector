@@ -3,14 +3,16 @@ from dataclasses import dataclass
 from app import db
 
 
-class DeviceProv:
+class DeviceProvider:
     """
     Device Provider interface. Service
     instance that takes query results
     and parse them into SchemaDevice
     instances.
     """
-    def fetch_by_user_tkn(self, token: str) -> list:
+
+    @staticmethod
+    def fetch_device_by_token(token: str) -> list:
         # DB List of Results
         fetch_result = db.prov_user_devices(user_tkn=token)
         # Elaborate SchemaDevice instances
@@ -21,11 +23,11 @@ class DeviceProv:
             devices.append(d)
         return devices
 
-    def poll_by_device_id(self, id_list: list) -> list:
-        # DB List of Results
-        fetch_result = db.prov_device_poll(id_list)
+    def fetch_device_state(self, id_list: list):
         # Elaborate SchemaDevice instances
         devices = [SchemaDevice(_id) for _id in id_list]
+        # DB List of Results
+        fetch_result = db.polling_device(id_list)
         # Iteration to filter
         # states results
         d_id, s_index = 0, 0
@@ -45,4 +47,10 @@ class DeviceProv:
                 s_index = 0
                 d_id += 1
         return devices
+
+    def put_device_state(self, id_list: list, *poll_data) -> list:
+        """"""
+        return db.polling_device(id_list, dict(capability=poll_data[0], value=poll_data[1]))
+
+
 
