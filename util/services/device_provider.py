@@ -49,8 +49,18 @@ class DeviceProvider:
         return devices
 
     def put_device_state(self, id_list: list, *poll_data) -> list:
-        """"""
-        return db.polling_device(id_list, dict(capability=poll_data[0], value=poll_data[1]))
+        capability, value = poll_data
+        if len(poll_data) > 2:
+            unit = poll_data[2]
+        else:
+            unit = None
 
-
+        return db.polling_device(
+            id_list,
+            dict(
+                capability=capability,
+                value=value,
+                unit=unit
+            )
+        )
 

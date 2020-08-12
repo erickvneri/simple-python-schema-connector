@@ -23,17 +23,17 @@ class SchemaDB:
     """
     BASE_DIR = os.path.dirname(os.path.realpath(__file__))
     DB_URL = f'{BASE_DIR}/schema_connector_db.sqlite'
+    db = sqlite3.connect(DB_URL)
 
     def init_db(self) -> None:
         try:
-            db = sqlite3.connect(self.DB_URL)
-            self._create_all(db)
+            self._create_all(self.db)
         except (OperationalError, IntegrityError) as e:
             logging.warning('DATABASE ERROR - %s' % e)
         else:
-            db.commit()
+            self.db.commit()
         finally:
-            db.close()
+            self.db.close()
 
     def _create_all(self, database):
         self._create_callback_table(database)
@@ -165,12 +165,12 @@ class SchemaDB:
         else:
             cursor = db.cursor()
             if not poll_data:
-                return self._get_device_status(cursor, id_list)
+                return self._get_device_state(cursor, id_list)
             else:
-                return self._put_device_status(cursor, id_list, poll_data)
+                return self._put_device_state(cursor, id_list, poll_data)
 
     @staticmethod
-    def _get_device_status(*info):
+    def _get_device_state(*info):
         # Output poll
         cursor, id_list = info
         # From list of ids, return
@@ -189,7 +189,7 @@ class SchemaDB:
         return data.fetchall()
 
     @staticmethod
-    def _put_device_status(*info):
+    def _put_device_state(*info):
         # Input poll
         cursor, device_id, data = info
         # Update POLL_INFO table based
