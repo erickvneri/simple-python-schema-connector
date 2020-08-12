@@ -11,8 +11,7 @@ class DeviceProvider:
     instances.
     """
 
-    @staticmethod
-    def fetch_device_by_token(token: str) -> list:
+    def fetch_device_by_token(self, token: str) -> list:
         # DB List of Results
         fetch_result = db.prov_user_devices(user_token=token)
         # Elaborate SchemaDevice instances
@@ -64,7 +63,7 @@ class DeviceProvider:
             )
         )
 
-    def save_callback_data(self, callback_authentication: dict, callback_urls: dict, client_secret: str):
+    def put_callback_data(self, callback_authentication: dict, callback_urls: dict, client_secret: str):
         data = dict(
             callback_url=callback_urls['stateCallback'],
             oauth_url=callback_urls['oauthToken'],
@@ -73,3 +72,12 @@ class DeviceProvider:
             client_secret=client_secret
         )
         return db.put_callback_info(data)
+
+    def get_token_request_data(self):
+        return db.get_callback_info()[0]
+
+    def get_access_token(self):
+        return db.get_access_token()[0]
+
+    def put_access_token(self, access_token: str, refresh_token: str=None):
+        return db.put_access_token(access_token, refresh_token)

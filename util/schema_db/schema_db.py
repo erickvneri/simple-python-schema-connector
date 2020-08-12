@@ -221,19 +221,94 @@ class SchemaDB:
     @staticmethod
     def _put_callback_info(*info):
         cursor, callback_data = info
-        # query
-        q_callback = \
-            'INSERT INTO CALLBACK_INFO ' + \
-            '(callback_url,oauth_url,code,client_id,client_secret) ' + \
-            'VALUES ' + \
-            '("%s","%s","%s","%s","%s")' \
-                % (callback_data['callback_url'],
-                   callback_data['oauth_url'],
-                   callback_data['code'],
-                   callback_data['client_id'],
-                   callback_data['client_secret'])
+        # Check if there are values
+        cur_data = cursor.execute('SELECT * FROM CALLBACK_INFO WHERE id=1').fetchall()
+        if not cur_data:
+            # query
+            q_callback = \
+                'INSERT INTO CALLBACK_INFO ' + \
+                '(callback_url,oauth_url,code,client_id,client_secret) ' + \
+                'VALUES ' + \
+                '(?,?,?,?,?)'
+        else:
+            q_callback = \
+                'UPDATE CALLBACK_INFO ' + \
+                'SET ' + \
+                'callback_url=?,' + \
+                'oauth_url=?,' + \
+                'code=?,' + \
+                'client_id=?,' + \
+                'client_secret=? ' + \
+                'WHERE id=1'
         # Execute query
-        cursor.execute(q_callback)
+        data = (callback_data['callback_url'],
+                callback_data['oauth_url'],
+                callback_data['code'],
+                callback_data['client_id'],
+                callback_data['client_secret'])
+        cursor.execute(q_callback, data)
+
+    def get_callback_info(self):
+        try:
+            db = sqlite3.connect(self.DB_URL)
+            cursor = db.cursor()
+            callback_info = self._get_callback_info(cursor)
+        except OperationalError as e:
+            logging.warning('DATABASE ERROR', e)
+        else:
+            db.close()
+            return callback_info
+
+    @staticmethod
+    def _get_callback_info(cursor):
+        q_callback = \
+            'SELECT ' + \
+            'oauth_url, code, client_id, client_secret ' + \
+            'FROM CALLBACK_INFO ' + \
+            'WHERE id=1'
+        data = cursor.execute(q_callback)
+        return data.fetchall()
+
+    def get_access_token(self):
+        try:
+            db = sqlite3.connect(self.DB_URL)
+            cursor = db.cursor()
+            access_token = self._get_access_token(cursor)
+        except OperationalError as e:
+            logging.warning('DATABASE ERROR', e)
+        else:
+            db.close()
+            return access_token
+
+    @staticmethod
+    def _get_access_token(cursor):
+        q_token = \
+            'SELECT cb_access_token ' + \
+            'FROM CALLBACK_INFO ' + \
+            'WHERE id=1'
+        data = cursor.execute(q_token)
+        return data.fetchone()
+
+    def put_access_token(self, access_token, refresh_token):
+        try:
+            db = sqlite3.connect(self.DB_URL)
+            cursor = db.cursor()
+            self._put_access_token(cursor, access_token, refresh_token)
+        except (OperationalError, IntegrityError) as e:
+            logging.warning('DATABASE ERROR', e)
+        else:
+            db.commit()
+            db.close()
+
+    @staticmethod
+    def _put_access_token(cursor, *token):
+        q_token = \
+            'UPDATE CALLBACK_INFO ' + \
+            'SET ' + \
+            'cb_access_token=?,' + \
+            'cb_refresh_token=? ' + \
+            'WHERE id=1'
+        cursor.execute(q_token, token)
 
 #############################################################
 #############################################################
@@ -242,15 +317,20 @@ class SchemaDB:
 #############################################################
     @staticmethod
     def _user_mock_inserts(database):
+        from hashlib import md5
+
         cursor = database.cursor()
         cursor.execute('DELETE FROM USER_INFO')
         for i in range(1,200):
             q_user = \
                 'INSERT INTO USER_INFO' + \
-                '(username, password,last_login,created_date)' + \
+                '(username,password,last_login,created_date)' + \
                 'VALUES ' + \
-                '("USER_%s","PASS","%s", "%s")' % (i,datetime.now(),datetime.now())
-            cursor.execute(q_user)
+                '(?, ?, ?, ?)'
+            cursor.execute(
+                q_user,
+                (f'TEST_USER_{i}', md5(b'mock_pass').hexdigest(), datetime.now(), datetime.now()
+            ))
 
     @staticmethod
     def _token_mock_inserts(database):
@@ -276,8 +356,8 @@ class SchemaDB:
                 'INSERT INTO DEVICE_INFO' + \
                 '(id,user_id,label,device_handler,mn,model) ' + \
                 'VALUES ' + \
-                '("x%s", %i, "device_%s","c2c-switch","MNMN","MODEL")' % (i,randint(1,200),i)
-            cursor.execute(q_device)
+                '(?,?,?,"c2c-switch","MNMN","MODEL")'
+            cursor.execute(q_device, (f'x{i}', i, f'device_{randint(1,200)}'))
             # Poll query
             q_poll = \
                 'INSERT INTO POLL_INFO' + \
@@ -286,7 +366,8 @@ class SchemaDB:
                 '("x%s","%s","st.switch","switch","%s","%s")' \
                 % (i,datetime.now(),choice(['on','off']),choice(['main','secondary']))
             q_poll += \
-                ',("x%s", "%s", "st.healthCheck","healthStatus","%s","%s")' \
-                % (i,datetime.now(),choice(['online','offline']),choice(['main','secondary']))
-            cursor.execute(q_poll)
-
+                ',(?, ?, "st.healthCheck","healthStatus", ?, ?)'
+            cursor.execute(
+                q_poll,
+                (f'x{i}',datetime.now(),choice(['online','offline']),choice(['main','secondary'])
+            ))
