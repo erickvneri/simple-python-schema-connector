@@ -14,7 +14,7 @@ class DeviceProvider:
     @staticmethod
     def fetch_device_by_token(token: str) -> list:
         # DB List of Results
-        fetch_result = db.prov_user_devices(user_tkn=token)
+        fetch_result = db.prov_user_devices(user_token=token)
         # Elaborate SchemaDevice instances
         devices = []
         for i in fetch_result:
@@ -64,3 +64,12 @@ class DeviceProvider:
             )
         )
 
+    def save_callback_data(self, callback_authentication: dict, callback_urls: dict, client_secret: str):
+        data = dict(
+            callback_url=callback_urls['stateCallback'],
+            oauth_url=callback_urls['oauthToken'],
+            client_id=callback_authentication['clientId'],
+            code=callback_authentication['code'],
+            client_secret=client_secret
+        )
+        return db.put_callback_info(data)

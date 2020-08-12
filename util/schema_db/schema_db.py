@@ -23,17 +23,17 @@ class SchemaDB:
     """
     BASE_DIR = os.path.dirname(os.path.realpath(__file__))
     DB_URL = f'{BASE_DIR}/schema_connector_db.sqlite'
-    db = sqlite3.connect(DB_URL)
 
     def init_db(self) -> None:
         try:
-            self._create_all(self.db)
+            db = sqlite3.connect(self.DB_URL)
+            self._create_all(db)
         except (OperationalError, IntegrityError) as e:
             logging.warning('DATABASE ERROR - %s' % e)
         else:
-            self.db.commit()
+            db.commit()
         finally:
-            self.db.close()
+            db.close()
 
     def _create_all(self, database):
         self._create_callback_table(database)
@@ -123,7 +123,7 @@ class SchemaDB:
         cursor = database.cursor()
         cursor.execute(poll_table_query)
 
-    def prov_user_devices(self, user_tkn):
+    def prov_user_devices(self, user_token):
         """
         prov_user_devices is invoked while
         gathering response data for Schema
@@ -135,17 +135,17 @@ class SchemaDB:
             logging.warning(e)
         else:
             cursor = db.cursor()
-            return self._prov_user_devices(cursor, user_tkn)
+            return self._prov_user_devices(cursor, user_token)
 
     @staticmethod
     def _prov_user_devices(*info):
-        cursor, param = info
+        cursor, user_token = info
         # From auth_token received, get
         # user id and return respective
         # devices.
         user_id_query = \
             'SELECT user_id FROM TOKEN_INFO ' + \
-            'WHERE access_token="%s"' % param
+            'WHERE access_token="%s"' % user_token
         devices_query = \
             'SELECT * FROM DEVICE_INFO ' + \
             'WHERE user_id=(%s)' % user_id_query
@@ -206,6 +206,34 @@ class SchemaDB:
         # Execute query
         cursor.execute(poll_query)
 
+    def put_callback_info(self, callback_info: dict):
+        try:
+            db = sqlite3.connect(self.DB_URL)
+            cursor = db.cursor()
+            self._put_callback_info(cursor, callback_info)
+        except OperationalError as e:
+            logging.warning('DATABASE ERROR - %s' % e)
+        else:
+            db.commit()
+        finally:
+            db.close()
+
+    @staticmethod
+    def _put_callback_info(*info):
+        cursor, callback_data = info
+        # query
+        q_callback = \
+            'INSERT INTO CALLBACK_INFO ' + \
+            '(callback_url,oauth_url,code,client_id,client_secret) ' + \
+            'VALUES ' + \
+            '("%s","%s","%s","%s","%s")' \
+                % (callback_data['callback_url'],
+                   callback_data['oauth_url'],
+                   callback_data['code'],
+                   callback_data['client_id'],
+                   callback_data['client_secret'])
+        # Execute query
+        cursor.execute(q_callback)
 
 #############################################################
 #############################################################
