@@ -1,8 +1,9 @@
-from util import SchemaDB
+from util import DB
 
 
 # DB Instance
-db = SchemaDB()
+db = DB()
 
 if __name__ == '__main__':
-    db.init_db()
+    db.init()
+

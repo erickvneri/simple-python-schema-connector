@@ -1,8 +1,13 @@
 from stschema import SchemaDevice
 from dataclasses import dataclass
+from datetime import datetime
+
+# FIXME: DevicesDB reference
 from app import db
+from util.schema_db import DevicesDB
 
 
+@dataclass
 class DeviceProvider:
     """
     Device Provider interface. Service
@@ -10,10 +15,12 @@ class DeviceProvider:
     and parse them into SchemaDevice
     instances.
     """
+    devices_db = DevicesDB()
+
 
     def fetch_device_by_token(self, token: str) -> list:
         # DB List of Results
-        fetch_result = db.prov_user_devices(user_token=token)
+        fetch_result = self.devices_db.prov_user_devices(user_token=token)
         # Elaborate SchemaDevice instances
         devices = []
         for i in fetch_result:
@@ -26,7 +33,7 @@ class DeviceProvider:
         # Elaborate SchemaDevice instances
         devices = [SchemaDevice(_id) for _id in id_list]
         # DB List of Results
-        fetch_result = db.polling_device(id_list)
+        fetch_result = self.devices_db.get_device_state(id_list)
         # Iteration to filter
         # states results
         d_id, s_index = 0, 0
@@ -47,21 +54,12 @@ class DeviceProvider:
                 d_id += 1
         return devices
 
-    def put_device_state(self, id_list: list, *poll_data) -> list:
-        capability, value = poll_data
-        if len(poll_data) > 2:
-            unit = poll_data[2]
-        else:
-            unit = None
-
-        return db.polling_device(
+    def put_device_state(self, id_list: list, poll_data: dict) -> list:
+        return self.devices_db.put_device_state(
             id_list,
-            dict(
-                capability=capability,
-                value=value,
-                unit=unit
-            )
-        )
+            poll_data.get('capability'),
+            poll_data.get('value'),
+            poll_data.get('unit', None))
 
     def put_callback_data(self, callback_authentication: dict, callback_urls: dict, client_secret: str):
         data = dict(
@@ -74,10 +72,10 @@ class DeviceProvider:
         return db.put_callback_info(data)
 
     def get_token_request_data(self):
-        return db.get_callback_info()[0]
+        return db.get_callback_info()
 
     def get_access_token(self):
-        return db.get_access_token()[0]
+        return db.get_access_token()
 
     def put_access_token(self, access_token: str, refresh_token: str=None):
         return db.put_access_token(access_token, refresh_token)

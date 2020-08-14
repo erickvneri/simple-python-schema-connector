@@ -2,7 +2,6 @@
 # of users, devices, tokens and callback
 # arguments received at the Grant Callback
 # Access interaction type
-from stschema import SchemaDevice
 from dataclasses import dataclass
 from datetime import datetime
 from sqlite3 import OperationalError, IntegrityError
@@ -14,17 +13,18 @@ logging.basicConfig(format='%(asctime)s - %(message)s')
 
 
 @dataclass
-class SchemaDB:
+class DB:
     """
-    The SchemaDB stores the necessary
-    information to handle users, devices,
-    polling data and auth token related
-    info.
+    The DB is the main entity that
+    containt CREATE TABLES statements
+    to initialize the database and an
+    init_session method to initialize
+    a db context.
     """
     BASE_DIR = os.path.dirname(os.path.realpath(__file__))
     DB_URL = f'{BASE_DIR}/schema_connector_db.sqlite'
 
-    def init_db(self) -> None:
+    def init(self) -> None:
         try:
             db = sqlite3.connect(self.DB_URL)
             self._create_all(db)
@@ -123,115 +123,18 @@ class SchemaDB:
         cursor = database.cursor()
         cursor.execute(poll_table_query)
 
-    def prov_user_devices(self, user_token):
-        """
-        prov_user_devices is invoked while
-        gathering response data for Schema
-        Discovery Requests.
-        """
-        try:
-            db = sqlite3.connect(self.DB_URL)
-        except OperationalError as e:
-            logging.warning(e)
-        else:
-            cursor = db.cursor()
-            return self._prov_user_devices(cursor, user_token)
-
-    @staticmethod
-    def _prov_user_devices(*info):
-        cursor, user_token = info
-        # From auth_token received, get
-        # user id and return respective
-        # devices.
-        user_id_query = \
-            'SELECT user_id FROM TOKEN_INFO ' + \
-            'WHERE access_token="%s"' % user_token
-        devices_query = \
-            'SELECT * FROM DEVICE_INFO ' + \
-            'WHERE user_id=(%s)' % user_id_query
-        data = cursor.execute(devices_query)
-        return data.fetchall()
-
-    def polling_device(self, id_list: list, poll_data: dict=None):
-        """
-        prov_devices_poll is invoked while
-        gathering response data for Schema
-        State Refresh or Command Requests.
-        """
-        try:
-            db = sqlite3.connect(self.DB_URL)
-        except OperationalError as e:
-            logging.warning(e)
-        else:
-            cursor = db.cursor()
-            if not poll_data:
-                return self._get_device_state(cursor, id_list)
-            else:
-                return self._put_device_state(cursor, id_list, poll_data)
-
-    @staticmethod
-    def _get_device_state(*info):
-        # Output poll
-        cursor, id_list = info
-        # From list of ids, return
-        # filtered results.
-        if len(id_list) > 1:
-            condition = 'IN '.format(tuple(id_list))
-        else:
-            condition = '="%s"' % id_list[0]
-        # Elaborate Base query
-        poll_query = \
-            'SELECT * FROM POLL_INFO ' + \
-            'WHERE device_id ' + \
-            condition #filtered condition
-        # Execute query
-        data = cursor.execute(poll_query)
-        return data.fetchall()
-
-    @staticmethod
-    def _put_device_state(*info):
-        # Input poll
-        cursor, device_id, data = info
-        # Update POLL_INFO table based
-        # on the device_id passed.
-        poll_query = \
-            'UPDATE POLL_INFO ' + \
-            'SET ' + \
-            'value="%s",' % data['value'] + \
-            'poll_date="%s" ' % str(datetime.now()) + \
-            'WHERE ' + \
-            'device_id="%s" ' % device_id[0] + \
-            'AND ' + \
-            'capability="%s"' % data['capability']
-        # Execute query
-        cursor.execute(poll_query)
-
-    def put_callback_info(self, callback_info: dict):
-        try:
-            db = sqlite3.connect(self.DB_URL)
-            cursor = db.cursor()
-            self._put_callback_info(cursor, callback_info)
-        except OperationalError as e:
-            logging.warning('DATABASE ERROR - %s' % e)
-        else:
-            db.commit()
-        finally:
-            db.close()
-
-    @staticmethod
-    def _put_callback_info(*info):
-        cursor, callback_data = info
+    def put_callback_info(self, callback_data: dict) -> None:
         # Check if there are values
-        cur_data = cursor.execute('SELECT * FROM CALLBACK_INFO WHERE id=1').fetchall()
+        cur_data = self.init_session('SELECT * FROM CALLBACK_INFO WHERE id=1')
         if not cur_data:
             # query
-            q_callback = \
+            cb_query = \
                 'INSERT INTO CALLBACK_INFO ' + \
                 '(callback_url,oauth_url,code,client_id,client_secret) ' + \
                 'VALUES ' + \
                 '(?,?,?,?,?)'
         else:
-            q_callback = \
+            cb_query = \
                 'UPDATE CALLBACK_INFO ' + \
                 'SET ' + \
                 'callback_url=?,' + \
@@ -240,75 +143,53 @@ class SchemaDB:
                 'client_id=?,' + \
                 'client_secret=? ' + \
                 'WHERE id=1'
-        # Execute query
-        data = (callback_data['callback_url'],
-                callback_data['oauth_url'],
-                callback_data['code'],
-                callback_data['client_id'],
-                callback_data['client_secret'])
-        cursor.execute(q_callback, data)
+        # parse data in tuple
+        return self.init_session(
+            cb_query,
+            callback_data['callback_url'],
+            callback_data['oauth_url'],
+            callback_data['code'],
+            callback_data['client_id'],
+            callback_data['client_secret'])
 
     def get_callback_info(self):
-        try:
-            db = sqlite3.connect(self.DB_URL)
-            cursor = db.cursor()
-            callback_info = self._get_callback_info(cursor)
-        except OperationalError as e:
-            logging.warning('DATABASE ERROR', e)
-        else:
-            db.close()
-            return callback_info
-
-    @staticmethod
-    def _get_callback_info(cursor):
-        q_callback = \
+        cb_query = \
             'SELECT ' + \
             'oauth_url, code, client_id, client_secret ' + \
             'FROM CALLBACK_INFO ' + \
             'WHERE id=1'
-        data = cursor.execute(q_callback)
-        return data.fetchall()
+        return self.init_session(cb_query)
 
     def get_access_token(self):
-        try:
-            db = sqlite3.connect(self.DB_URL)
-            cursor = db.cursor()
-            access_token = self._get_access_token(cursor)
-        except OperationalError as e:
-            logging.warning('DATABASE ERROR', e)
-        else:
-            db.close()
-            return access_token
-
-    @staticmethod
-    def _get_access_token(cursor):
-        q_token = \
+        token_query = \
             'SELECT cb_access_token ' + \
             'FROM CALLBACK_INFO ' + \
             'WHERE id=1'
-        data = cursor.execute(q_token)
-        return data.fetchone()
+        return self.init_session(token_query)
 
-    def put_access_token(self, access_token, refresh_token):
-        try:
-            db = sqlite3.connect(self.DB_URL)
-            cursor = db.cursor()
-            self._put_access_token(cursor, access_token, refresh_token)
-        except (OperationalError, IntegrityError) as e:
-            logging.warning('DATABASE ERROR', e)
-        else:
-            db.commit()
-            db.close()
-
-    @staticmethod
-    def _put_access_token(cursor, *token):
-        q_token = \
+    def put_access_token(self, access_token, refresh_token) -> None:
+        token_query = \
             'UPDATE CALLBACK_INFO ' + \
             'SET ' + \
             'cb_access_token=?,' + \
             'cb_refresh_token=? ' + \
             'WHERE id=1'
-        cursor.execute(q_token, token)
+        return self.init_session(token_query, access_token, refresh_token)
+
+    def init_session(self, query, *args):
+        # Script that initialize a db
+        # connection and executes the
+        # passed query.
+        try:
+            db = sqlite3.connect(self.DB_URL)
+            cursor = db.cursor()
+            result = cursor.execute(query, args).fetchall()
+        except (OperationalError, IntegrityError) as e:
+            logging.warning('Database Execution error - %s' % e )
+        else:
+            db.commit()
+            db.close()
+            return result
 
 #############################################################
 #############################################################

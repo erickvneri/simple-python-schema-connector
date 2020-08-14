@@ -1,1 +1,2 @@
-from .schema_db import SchemaDB
+from .main import DB
+from .devices_db import DevicesDB
