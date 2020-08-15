@@ -13,7 +13,7 @@ logging.basicConfig(format='%(asctime)s - %(message)s')
 
 
 @dataclass
-class DB:
+class MainDB:
     """
     The DB is the main entity that
     containt CREATE TABLES statements

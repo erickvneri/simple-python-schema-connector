@@ -1,26 +1,21 @@
 from stschema import SchemaDevice
-from dataclasses import dataclass
 from datetime import datetime
-
-# FIXME: DevicesDB reference
-from app import db
-from util.schema_db import DevicesDB
+from util.db import DevicesDB
+from dataclasses import dataclass
 
 
 @dataclass
-class DeviceProvider:
+class DeviceProvider(DevicesDB):
     """
     Device Provider interface. Service
     instance that takes query results
     and parse them into SchemaDevice
     instances.
     """
-    devices_db = DevicesDB()
-
 
     def fetch_device_by_token(self, token: str) -> list:
         # DB List of Results
-        fetch_result = self.devices_db.prov_user_devices(user_token=token)
+        fetch_result = super().prov_user_devices(user_token=token)
         # Elaborate SchemaDevice instances
         devices = []
         for i in fetch_result:
@@ -33,7 +28,7 @@ class DeviceProvider:
         # Elaborate SchemaDevice instances
         devices = [SchemaDevice(_id) for _id in id_list]
         # DB List of Results
-        fetch_result = self.devices_db.get_device_state(id_list)
+        fetch_result = super().get_device_state(id_list)
         # Iteration to filter
         # states results
         d_id, s_index = 0, 0
@@ -55,7 +50,7 @@ class DeviceProvider:
         return devices
 
     def put_device_state(self, id_list: list, poll_data: dict) -> list:
-        return self.devices_db.put_device_state(
+        return super().put_device_state(
             id_list,
             poll_data.get('capability'),
             poll_data.get('value'),
@@ -69,13 +64,13 @@ class DeviceProvider:
             code=callback_authentication['code'],
             client_secret=client_secret
         )
-        return db.put_callback_info(data)
+        return super().put_callback_info(data)
 
     def get_token_request_data(self):
-        return db.get_callback_info()
+        return super().get_callback_info()
 
     def get_access_token(self):
-        return db.get_access_token()
+        return super().get_access_token()
 
     def put_access_token(self, access_token: str, refresh_token: str=None):
-        return db.put_access_token(access_token, refresh_token)
+        return super().put_access_token(access_token, refresh_token)

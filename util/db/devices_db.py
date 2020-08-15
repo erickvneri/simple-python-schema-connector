@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from util.schema_db.main import DB
+from util.db.main_db import MainDB
 from datetime import datetime
 
 
 @dataclass
-class DevicesDB(DB):
+class DevicesDB(MainDB):
     """
     This class offers interfaces to
     execute device-related db transaction.
@@ -50,7 +50,6 @@ class DevicesDB(DB):
             'device_id=? ' + \
             'AND ' + \
             'capability=?'
-        print(poll_query)
         return self.init_session(
             poll_query,
             value,

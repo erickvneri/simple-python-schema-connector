@@ -3,11 +3,16 @@ import sqlite3
 import unittest
 from random import randint
 from sqlite3 import InterfaceError, IntegrityError
-from util.schema_db.main import DB
+from util import MainDB
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 
 class TestDatabaseTables(unittest.TestCase):
+    """
+    Test case to verify unique and
+    data constraints about columns
+    declared.
+    """
     @classmethod
     def setUpClass(cls):
         # Create test_db.sqlite file and
@@ -21,6 +26,11 @@ class TestDatabaseTables(unittest.TestCase):
         cls.session = cls.connection.cursor()
 
     def setUp(self):
+        # Lambda function that returns
+        # an implemented data type from
+        # the datat pereceived. Ease
+        # the instantiation of different
+        # datatypes.
         self.dtypes = lambda type: \
             int(123) if type == int else \
             bytes(b'bytes') if type == bytes else \

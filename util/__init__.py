@@ -1,4 +1,4 @@
-from .schema_db import DB
+from .db import MainDB
 
 # Services
 from .services import DeviceProvider

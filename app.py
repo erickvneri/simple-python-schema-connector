@@ -1,9 +1,8 @@
-from util import DB
+from util import MainDB
 
 
 # DB Instance
-db = DB()
+db = MainDB()
 
 if __name__ == '__main__':
     db.init()
-
