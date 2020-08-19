@@ -18,7 +18,7 @@ class TestDatabaseTables(unittest.TestCase):
         # Create test_db.sqlite file and
         # call init() method to create
         # all respective tables.
-        db = DB()
+        db = MainDB()
         db.DB_URL = base_dir + 'test_db.sqlite'
         db.init()
         # Connection
