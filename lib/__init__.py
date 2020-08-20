@@ -1,5 +1,5 @@
 from .db import MainDB
 
 # Services
-from .services import DeviceProvider
+from .services import DeviceService
 

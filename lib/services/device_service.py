@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class DeviceProvider(MainDB):
+class DeviceService(MainDB):
     """
     Device Provider interface. Service
     instance that takes query results
@@ -57,10 +57,10 @@ class DeviceProvider(MainDB):
     def put_device_state(self, id_list: list, poll_data: dict) -> list:
         return self._put_device_state(
             id_list,
+            poll_data.get('component'),
             poll_data.get('capability'),
             poll_data.get('attribute'),
-            poll_data.get('value'),
-            poll_data.get('unit', None))
+            poll_data.get('value'))
 
     # def put_callback_data(self, callback_authentication: dict, callback_urls: dict, client_secret: str):
         # data = dict(
@@ -119,24 +119,24 @@ class DeviceProvider(MainDB):
         return super().init_session(devices_query, user_token)
 
     def _put_device_state(self, id_list, *state_data):
-        capability, attribute, value, unit = state_data
+        component, capability, attribute, value = state_data
         # Update POLL_INFO table based
         # on the device_id passed.
         poll_query = \
             'UPDATE POLL_INFO ' + \
             'SET ' + \
             'value=?,' + \
-            'poll_date=?,' + \
-            'unit=? ' + \
+            'poll_date=? ' + \
             'WHERE device_id=? ' + \
             'AND capability=? ' + \
-            'AND attribute=?'
+            'AND attribute=? ' + \
+            'AND component=?'
         return super().init_session(
             poll_query,
             value,
             str(datetime.now()),
-            unit,
             id_list[0],
             capability,
-            attribute
+            attribute,
+            component
         )

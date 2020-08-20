@@ -277,13 +277,13 @@ class MainDB:
                 'INSERT INTO POLL_INFO' + \
                 '(device_id,poll_date,capability,attribute,value,component) ' + \
                 'VALUES' + \
-                '("x%s","%s","st.switch","switch","%s","%s")' \
-                % (i,datetime.now(),choice(['on','off']),choice(['main','secondary']))
+                '("x%s","%s","st.switch","switch","%s","main")' \
+                % (i,datetime.now(),choice(['on','off']))
             q_poll += \
-                ',(?, ?, "st.healthCheck","healthStatus", ?, ?)'
+                ',(?, ?, "st.healthCheck","healthStatus", ?, "main")'
             cursor.execute(
                 q_poll,
-                (f'x{i}',datetime.now(),choice(['online','offline']),choice(['main','secondary'])
+                (f'x{i}',datetime.now(),choice(['online','offline'])
             ))
             mn_query = \
                 'INSERT INTO MN_INFO' + \
