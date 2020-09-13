@@ -1,0 +1,232 @@
+device_state_info = [
+    {
+        'unique_id': 'x001',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.switch',
+                'attribute': 'switch',
+                'value': 'off'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.switchLevel',
+                'attribute': 'level',
+                'value': 50
+            }
+        ]
+    },
+    {
+        'unique_id': 'x002',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.presenceSensor',
+                'attribute': 'presense',
+                'value': 'present'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 89
+            }
+        ]
+    },
+    {
+        'unique_id': 'x003',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.contactSensor',
+                'attribute': 'contact',
+                'value': 'open'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.temperatureMeasurement',
+                'attribute': 'temperature',
+                'value': 23,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 76
+            }
+        ]
+    },
+    {
+        'unique_id': 'x004',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.button',
+                'attribute': 'numberOfButtons',
+                'value': 1
+            },
+            {
+                'component': 'main',
+                'capability': 'st.button',
+                'attribute': 'button',
+                'value': 'pressed'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.motionSensor',
+                'attribute': 'motion',
+                'value': 'active'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 98
+            }
+        ]
+    },
+    {
+        'unique_id': 'x005',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.relativeHumidityMeasurement',
+                'attribute': 'humidity',
+                'value': 40
+            },
+            {
+                'component': 'main',
+                'capability': 'st.temperatureMeasurement',
+                'attribute': 'temperature',
+                'value': 18,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 76
+            }
+        ]
+    },
+    {
+        'unique_id': 'x006',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.waterSensor',
+                'attribute': 'water',
+                'value': 'wet'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.temperatureMeasurement',
+                'attribute': 'temperature',
+                'value': 20,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 64
+            }
+        ]
+    },
+    {
+        'unique_id': 'x007',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.motionSensor',
+                'attribute': 'motion',
+                'value': 'active'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.temperatureMeasurement',
+                'attribute': 'temperature',
+                'value': 20,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 100
+            }
+        ]
+    },
+    {
+        'unique_id': 'x008',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.carbonMonoxideDetector',
+                'attribute': 'carbonMonoxide',
+                'value': 'clear'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 80
+            }
+        ]
+    },
+    {
+        'unique_id': 'x009',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.windowShade',
+                'attribute': 'windowShade',
+                'value': 'open'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.supportedWindowShadeCommands',
+                'attribute': 'windowShade',
+                'value': [
+                    'open',
+                    'close',
+                    'pause'
+                ]
+            },
+            {
+                'component': 'main',
+                'capability': 'st.switch',
+                'attribute': 'switch',
+                'value': 'on',
+            },
+            {
+                'component': 'main',
+                'capability': 'st.switchLevel',
+                'attribute': 'level',
+                'value': 50
+            }
+        ]
+    },
+    {
+        'unique_id': 'x010',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.valve',
+                'attribute': 'valve',
+                'value': 'open'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.switch',
+                'attribute': 'switch',
+                'value': 'on',
+            }
+        ]
+    }
+]
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+with open(basedir + '/device_state_info.p', 'wb') as info:
+    pickle.dump(device_state_info, info)

@@ -1,0 +1,108 @@
+
+# File reference
+# device_info = [
+#     {
+#         'unique_id': 'x001',
+#         'label': 'switch_example',
+#         'device_handler': 'c2c-dimmer',
+#         'device_type': 'Dimmer Switch',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x002',
+#         'label': 'presence_sensor_example',
+#         'device_handler': 'c2c-arrival',
+#         'device_type': 'Presence Sensor',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x003',
+#         'label': 'contact_sensor_example',
+#         'device_handler': 'c2c-contact',
+#         'device_type': 'Contact Sensor',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x004',
+#         'label': 'doorbell_example',
+#         'device_handler': 'c2c-doorbell',
+#         'device_type': 'Doorbell',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x005',
+#         'label': 'humidity_sensor_example',
+#         'device_handler': 'c2c-humidity',
+#         'device_type': 'Humidity Sensor',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x006',
+#         'label': 'water_sensor_example',
+#         'device_handler': 'c2c-leak',
+#         'device_type': 'Water Sensor',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x007',
+#         'label': 'motion_sensor_example',
+#         'device_handler': 'c2c-motion',
+#         'device_type': 'Motion Sensor',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x008',
+#         'label': 'CO_detector_example',
+#         'device_handler': 'c2c-carbon-monoxide-3',
+#         'device_type': 'Carbon Monoxide',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x009',
+#         'label': 'window_shade_example',
+#         'device_type': 'c2c-shade',
+#         'device_handler': 'Window Shade',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     },
+#     {
+#         'unique_id': 'x010',
+#         'label': 'valve_example',
+#         'device_handler': 'c2c-valve',
+#         'device_type': 'Valve',
+#         'mn': {
+#             'mn': 'mock manufacturer',
+#             'model': '0.0.1'
+#         }
+#     }
+# ]
+# basedir = os.path.abspath(os.path.dirname(__file__))
+# with open(basedir + '/device_info.p', 'wb') as info:
+    # pickle.dump(device_info, info)
+

@@ -4,6 +4,7 @@
 # Pickle, Python's built-in module.
 import pickle
 import os
+from webhook_config import DEVICE_INFO_PATH, DEVICE_STATE_PATH
 
 
 class DeviceInformation():
@@ -17,8 +18,8 @@ class DeviceInformation():
     """
     def __init__(self):
         self.basedir = os.path.abspath(os.path.dirname(__file__))
-        self.device_info_path = '/device_info.p'
-        self.device_state_path = '/device_state_info.p'
+        self.device_info_path = DEVICE_INFO_PATH
+        self.device_state_path = DEVICE_STATE_PATH
 
     def get_all(self):
         # Read data step
