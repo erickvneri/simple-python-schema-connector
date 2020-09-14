@@ -4,7 +4,7 @@
 # Pickle, Python's built-in module.
 import pickle
 import os
-from webhook_config import DEVICE_INFO_PATH, DEVICE_STATE_PATH
+from lib.webhook.webhook_config import DEVICE_INFO_PATH, DEVICE_STATE_PATH
 
 
 class DeviceInformation():

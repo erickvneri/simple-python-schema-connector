@@ -3,10 +3,10 @@ import logging
 import pickle
 import os
 from datetime import datetime
-from oauth_config import (USER_INFO_PATH,
-                          SECRET,
-                          ALGORITHM,
-                          TOKEN_TYPE)
+from lib.oauth.oauth_config import (USER_INFO_PATH,
+                                    SECRET,
+                                    ALGORITHM,
+                                    TOKEN_TYPE)
 
 
 # LOGGING CONFIG

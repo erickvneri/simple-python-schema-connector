@@ -3,10 +3,10 @@ import json
 from http import HTTPStatus
 from http.server import (BaseHTTPRequestHandler,
                          HTTPServer)
-from webhook_config import (ADDRESS,
-                            PORT,
-                            ENCODING,
-                            WEBHOOK_ENDPOINT)
+from lib.webhook.webhook_config import (ADDRESS,
+                                        PORT,
+                                        ENCODING,
+                                        WEBHOOK_ENDPOINT)
 
 # logging config
 logging.basicConfig(level=logging.INFO,

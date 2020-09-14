@@ -4,8 +4,8 @@ from hashlib import md5
 from http import HTTPStatus
 from http.server import (BaseHTTPRequestHandler,
                          HTTPServer)
-from data import UserInformation
-from oauth_config import *
+from lib.oauth.data import UserInformation
+from lib.oauth.oauth_config import *
 
 # PATH CONFIG REFERENCE
 _PUBLIC_PATH = [LOGIN_PAGE,
