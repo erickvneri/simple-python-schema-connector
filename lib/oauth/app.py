@@ -1,9 +1,7 @@
-import logging
 from urllib import parse
 from hashlib import md5
 from http import HTTPStatus
-from http.server import (BaseHTTPRequestHandler,
-                         HTTPServer)
+from http.server import BaseHTTPRequestHandler
 from lib.oauth.data import UserInformation
 from lib.oauth.oauth_config import *
 
@@ -18,11 +16,6 @@ _PRIVATE_PATH = [AUTHORIZE_ENDPOINT,
                  CLIENT_SECRET,
                  REDIRECT_URI,
                  RESPONSE_TYPE]
-
-
-# LOGGING CONFIG
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(message)s')
 
 
 class OAuth2(BaseHTTPRequestHandler, UserInformation):
@@ -133,15 +126,3 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         cookie = md5(str(encode_data).encode('utf-8')).hexdigest()
         self.cookies[cookie] = encode_data
         return cookie
-
-
-if __name__ == "__main__":
-    import sys
-    address = (ADDRESS, PORT)
-    http = HTTPServer(address, OAuth2)
-    logging.info(f'OAuth2.0 service running at: {ADDRESS}:{PORT}')
-    try:
-        http.serve_forever()
-    except KeyboardInterrupt:
-        logging.warning('OAuth2.0 service aborted!!')
-        sys.exit()

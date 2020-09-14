@@ -1,16 +1,10 @@
-import logging
 import json
 from http import HTTPStatus
-from http.server import (BaseHTTPRequestHandler,
-                         HTTPServer)
+from http.server import BaseHTTPRequestHandler
 from lib.webhook.webhook_config import (ADDRESS,
                                         PORT,
                                         ENCODING,
                                         WEBHOOK_ENDPOINT)
-
-# logging config
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(message)s')
 
 
 class Webhook(BaseHTTPRequestHandler):
@@ -71,15 +65,3 @@ class Webhook(BaseHTTPRequestHandler):
         # Http Response body config
         json_response = json.dumps(data).encode(ENCODING)
         self.wfile.write(json_response)
-
-
-if __name__ == "__main__":
-    import sys
-    address = (ADDRESS, PORT)
-    http = HTTPServer(address, Webhook)
-    logging.info(f'Webhook service running at: {ADDRESS}:{PORT}')
-    try:
-        http.serve_forever()
-    except KeyboardInterrupt:
-        logging.warning('Webhook service aborted!!')
-        sys.exit()
