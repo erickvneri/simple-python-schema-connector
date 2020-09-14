@@ -1,10 +1,12 @@
 import os
 
-public_files_path = os.path.abspath(os.path.dirname(__file__) + '/../public')
 # PUBLIC FILES
-LOGIN_PAGE=public_files_path + '/login.html'
-DEVICES_PAGE=public_files_path + '/devices.html'
 LOGIN_ENDPOINT='/login'
+public_files_path = os.path.abspath(os.path.dirname(__file__) + '/../public')
+with open(public_files_path + '/login.html') as view:
+    LOGIN_PAGE=view.read().encode('utf-8')
+with open(public_files_path + '/devices.html') as view:
+    DEVICES_PAGE=view.read().encode('utf-8')
 
 # PRIVATE FILES
 AUTHORIZE_ENDPOINT='/authorize'
@@ -19,6 +21,8 @@ SECRET='my-schema-connector-webhook'
 USER_INFO_PATH='/user_info.b'
 ALGORITHM='HS256'
 TOKEN_TYPE='Bearer'
+
 # APP CONFIG
 ADDRESS='127.0.0.1'
 PORT=5000
+HTTP_V='HTTP/1.1'

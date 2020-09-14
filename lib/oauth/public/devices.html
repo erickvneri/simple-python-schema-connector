@@ -10,22 +10,22 @@
         <strong>Device Selection</strong>
     </h1>
     <hr>
-    <form action="/login">
+    <form action="/final_path" method="POST">
         <div>
             <ul>
-                <input type="radio">Dimmer Switch<br>
-                <input type="radio" value="Motion Sensor"><br>
-                <input type="radio" value="Contact Sensor"><br>
-                <input type="radio" value="Window Shade"><br>
-                <input type="radio" value=""><br>
-                <input type="radio" value=""><br>
-                <input type="radio" value=""><br>
-                <input type="radio" value=""><br>
-                <input type="radio" value=""><br>
-                <input type="radio" value="">
+                <input type="checkbox" name="Dimmer Switch" value="Dimmer Switch">Dimmer Switch<br>
+                <input type="checkbox" name="Presence Sensor">Presence Sensor<br>
+                <input type="checkbox" name="Contact Sensor">Contact Sensor<br>
+                <input type="checkbox" name="Doorbell">Doorbell<br>
+                <input type="checkbox" name="Humidity Sensor">Humidity Sensor<br>
+                <input type="checkbox" name="Water Sensor">Water Sensor<br>
+                <input type="checkbox" name="Motion Sensor">Motion Sensor<br>
+                <input type="checkbox" name="Carbon Monoxide">Carbon Monoxide<br>
+                <input type="checkbox" name="Window Shade">Window Shade<br>
+                <input type="checkbox" name="Valve">Valve<br>
             </ul>
         </div>
-        <button type="submit">Authorize</button>
+        <button type="submit" formmethod="POST" formenctype="application/x-www-form-urlencoded">Authorize</button>
     </form>
 </body>
 </html>
