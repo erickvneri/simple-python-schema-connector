@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My OAuth2.0 Instance</title>
+    <title>OAuth2.0 Test Instance</title>
 </head>
 <body>
     <h1>
@@ -12,9 +12,11 @@
     <hr>
     <p><em>This is a mock OAuth2.0 client. There's no need to use real user information.</em></p><br>
     <form action="/login">
+        <!-- Email -->
         <label for="email">Email:</label><br>
-        <input type="text" placeholder="email@example.com" type="email" name='email' required><br>
+        <input type="email" placeholder="email@example.com" type="email" name='email' required><br>
         <label for="password">Password:</label><br>
+        <!-- Password -->
         <input type="password" name='password' required><br>
         <button type="submit" formmethod="POST" formenctype="application/x-www-form-urlencoded">Click Here</button><br>
     </form>

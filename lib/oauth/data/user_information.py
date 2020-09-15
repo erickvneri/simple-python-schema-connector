@@ -2,11 +2,13 @@ import jwt
 import logging
 import pickle
 import os
+from hashlib import md5
 from datetime import datetime
 from lib.oauth.oauth_config import (USER_INFO_PATH,
                                     SECRET,
                                     ALGORITHM,
-                                    TOKEN_TYPE)
+                                    TOKEN_TYPE,
+                                    CLIENT_ID)
 
 
 # LOGGING CONFIG
@@ -19,7 +21,8 @@ class User:
         self.email = email
         self.password = password
         self.last_login = last_login
-        self.access_token = None
+        self.user_id = None
+        self.bearer_token = None
 
 
 class BearerToken:
@@ -36,46 +39,54 @@ class UserInformation():
     basedir = os.path.abspath(os.path.dirname(__file__))
     user_info_path = USER_INFO_PATH
 
-    def new_user(self, *data):
+    def grant_access_user(self, *data):
         email, password = data
         new = User(email, password, str(datetime.now()))
-        new.access_token = self._create_bearer_token(new)
+        new.user_id = md5(str(new.__dict__).encode('utf-8')).hexdigest()
         self._save_record(new.__dict__) # saving record at user_information.p
-        return new.access_token['code']
+        return new.user_id
 
-    @staticmethod
-    def _create_bearer_token(data):
+    def create_bearer_token(self, **data):
         # Create BearerToken instance.
         # Returns __dict__ of class instance
         # with JWT tokens.
         #
         # Data to encode
-        json_data = dict(email=data.email,
-                         password=data.password,
-                         timestamp=data.last_login)
-        # Access Token
-        json_data['grant'] = 'access'
-        acc_token = jwt.encode(json_data, SECRET, algorithm=ALGORITHM)
-        # Refresh Token
-        json_data['grant'] = 'refresh'
-        ref_token = jwt.encode(json_data, SECRET, algorithm=ALGORITHM)
-        # Code
-        json_data['grant'] = 'code'
-        code = jwt.encode(json_data, SECRET, algorithm=ALGORITHM)
-        del json_data['grant']
+        access_jwt_data = dict(devices=data.get('devices'))
+        refresh_jwt_data = dict(user_id=data.get('user_id'))
+        # Create JSON Web Tokens
+        acc_token = jwt.encode(access_jwt_data, SECRET, algorithm=ALGORITHM).decode('utf-8')
+        ref_token = jwt.encode(refresh_jwt_data, SECRET, algorithm=ALGORITHM).decode('utf-8')
         expires_in = 3600
+        code = md5(CLIENT_ID.encode('utf-8')).hexdigest()
         # BearerToken instance
         bearer_token = BearerToken(access_token=acc_token,
                                    refresh_token=ref_token,
                                    code=code,
                                    expires_in=expires_in,
                                    token_type=TOKEN_TYPE)
-        return bearer_token.__dict__
+        # Update user data to include
+        # set of JWT Tokens.
+        self._save_bearer_token(user_id=data.get('user_id'),
+                                bearer_token=bearer_token.__dict__)
 
-    def get_code(self):
-        # Return code from for
-        # GET Http Request at /authorize.
-        pass
+        logging.info('authorization code generated.')
+        return code
+
+    def _save_bearer_token(self, **data) -> None:
+        file_path = self.basedir + self.user_info_path
+        # Read file step
+        _file = open(file_path, 'rb')
+        info = pickle.load(_file)
+        # Filter user
+        user = list(filter(lambda u: u['user_id'] == data['user_id'], info))
+        user[0]['bearer_token'] = data['bearer_token']
+
+        # Write file step
+        _file = open(file_path, 'wb')
+        pickle.dump(info, _file)
+        _file.close()
+        logging.info('bearer token saved.')
 
     def get_access_token(self):
         # Return tokens exchange for
@@ -105,9 +116,4 @@ class UserInformation():
             _file = open(file_path, 'wb')
             pickle.dump(info, _file)
             _file.close()
-            logging.info('user_data stored')
-
-    def _load_record(self):
-        # Read file step
-        with open(self.basedir + self.user_info_path, 'rb') as info:
-            return pickle.load(info)
+            logging.info('new user information stored')
