@@ -4,6 +4,8 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from lib.oauth.data import UserInformation
 from lib.oauth.oauth_config import *
+##
+from flask import redirect
 
 # PATH CONFIG REFERENCE
 _PUBLIC_PATH = [LOGIN_ENDPOINT,
@@ -61,15 +63,16 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Handle path
         if path in _PUBLIC_PATH:
             return self._handle_public_request(path)
+        # elif path in _PRIVATE_PATH:
 
     def _handle_private_request(self, path):
         # Private request handler:
         #   - Code GET Http Request
         #   - Token POST Http Request
         path = parse.urlsplit(self.path)
-        query = parse.parse_qs(path.query)
         if path.path == AUTHORIZE_ENDPOINT:
             # Move along with authorization process
+            query = parse.parse_qs(path.query)
             if self._authorize_code_request(query):
                 # If request authorized,
                 # persist session.
@@ -90,8 +93,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             content_length = int(self.headers['Content-Length'])
             req_body = self.rfile.read(content_length).decode('utf-8')
             query = parse.parse_qs(req_body)
-            if self.headers['Cookie']:
-                cookie = self.headers['Cookie'].lstrip('Cookie: ')
+            cookie = self.headers.get('Cookie', None)
 
             # Process user data
             user_email =  query['email'][0]
@@ -115,9 +117,9 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length).decode('utf-8')
             # Set of devices reference
-            devices_ref = parse.parse_qs(body)
+            form_data = parse.parse_qs(body)
             session = self.cookies[self.headers['Cookie']]
-            code = super().create_bearer_token(devices=devices_ref, user_id=session['user_id'])
+            code = super().create_bearer_token(devices=form_data, user_id=session['user_id'])
             # Redirect authorization code
             return self._redirect_code(session['redirect_uri'], code=code, state=session['state'])
 
@@ -139,7 +141,11 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         else:
             return True
 
-    def _authorize_token_request(self, params):
+    def _authorize_token_request(self, **params):
+        pass
+
+    def _authorize_basic_header(self):
+        cred = self.headers.get('Authorization')
         pass
 
     def _send_public_file(self, public_file, cookie=None):
@@ -148,8 +154,6 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Set Http Headers
         self.send_header('Content-Type', 'text/html')
         self.send_header('Content-Length', int(len(public_file)))
-        self.send_header('Connection', 'keep-alive')
-        self.send_header('keep-alive', 'timeout=10, max=5')
         if cookie:
             self.send_header('Set-Cookie', cookie)
         self.end_headers()

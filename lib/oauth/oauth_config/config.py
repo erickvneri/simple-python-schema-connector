@@ -3,6 +3,7 @@ import os
 # PUBLIC FILES
 LOGIN_ENDPOINT='/login'
 DEVICES_ENDPOINT=LOGIN_ENDPOINT + '/devices'
+# HTML FILES PRELOAD
 public_files_path = os.path.abspath(os.path.dirname(__file__) + '/../public')
 with open(public_files_path + '/login.html') as view:
     LOGIN_PAGE=view.read().encode('utf-8')

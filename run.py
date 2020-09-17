@@ -37,4 +37,5 @@ if __name__ == "__main__":
         http.serve_forever()
     except KeyboardInterrupt:
         logging.warning(f'{service.__name__} service aborted!!')
+        http.server_close()
         sys.exit()
