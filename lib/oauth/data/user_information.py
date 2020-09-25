@@ -39,7 +39,7 @@ class UserInformation():
     basedir = os.path.abspath(os.path.dirname(__file__))
     user_info_path = USER_INFO_PATH
 
-    def grant_access_user(self, *data):
+    def grant_user_access(self, *data):
         email, password = data
         new = User(email, password, str(datetime.now()))
         new.user_id = md5(str(new.__dict__).encode('utf-8')).hexdigest()
@@ -88,12 +88,12 @@ class UserInformation():
         _file.close()
         logging.info('bearer token saved.')
 
-    def get_access_token(self):
+    def get_access_token(self, code: str) -> dict:
         # Return tokens exchange for
         # POST Http Request at /token.
         pass
 
-    def refresh_token(self):
+    def refresh_token(self, refresh_token: str) -> dict:
         # Refresh user tokens.
         pass
 

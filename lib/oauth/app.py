@@ -4,14 +4,10 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from lib.oauth.data import UserInformation
 from lib.oauth.oauth_config import *
-##
-from flask import redirect
 
 # PATH CONFIG REFERENCE
 _PUBLIC_PATH = [LOGIN_ENDPOINT,
-                DEVICES_ENDPOINT,
-                LOGIN_PAGE,
-                DEVICES_PAGE]
+                LOGIN_PAGE]
 
 _PRIVATE_PATH = [AUTHORIZE_ENDPOINT,
                  TOKEN_ENDPOINT,
@@ -63,7 +59,8 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Handle path
         if path in _PUBLIC_PATH:
             return self._handle_public_request(path)
-        # elif path in _PRIVATE_PATH:
+        elif path in _PRIVATE_PATH:
+            return self._handle_private_request(path)
 
     def _handle_private_request(self, path):
         # Private request handler:
@@ -71,7 +68,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         #   - Token POST Http Request
         path = parse.urlsplit(self.path)
         if path.path == AUTHORIZE_ENDPOINT:
-            # Move along with authorization process
+            # Move along with authorization process.
             query = parse.parse_qs(path.query)
             if self._authorize_code_request(query):
                 # If request authorized,
@@ -82,6 +79,19 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
                     cookie = self._set_cookie(state=state,
                                               redirect_uri=redirect_uri)
                 return self._send_public_file(LOGIN_PAGE, cookie)
+
+        elif path.path == TOKEN_ENDPOINT:
+            # Move along with token request
+            # authorization.
+            content_length = int(self.headers['Content-Length'])
+            req_body = self.rfile.read(content_length).decode('utf-8')
+            query = parse.parse_qs(req_body)
+
+            # Check Authorization Headers
+            if not self.headers.get('Authorization'):
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+            elif self._authorize_token_request(query):
+                pass
 
     def _handle_public_request(self, path):
         # Public Request handler:
@@ -94,34 +104,35 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             req_body = self.rfile.read(content_length).decode('utf-8')
             query = parse.parse_qs(req_body)
             cookie = self.headers.get('Cookie', None)
+            # Current session
+            session = self.cookies[cookie]
+            redirect_uri = session['redirect_uri']
+            state = session['state']
 
             # Process user data
-            user_email =  query['email'][0]
-            user_pass = query['password'][0]
+            user_email = query.pop('email')[0]
+            user_pass = query.pop('password')[0]
             user_pass = md5(user_pass.encode('utf-8')).hexdigest()
 
             # At this point, users should
             # have a valid third-party account
             # to integrate devices into
-            # SmartThings.
-            user_id = super().grant_access_user(user_email,
+            # third-parties.
+            user_id = super().grant_user_access(user_email,
                                                 user_pass)
-            # Update current cookie
+            # Update current cookie to
+            # track user bearer token at
+            # Token Request.
             self._update_cookie(cookie, user_id=user_id)
-            return self._send_public_file(DEVICES_PAGE, cookie)
 
-        elif path == DEVICES_ENDPOINT:
-            # Collect Http Request information
-            # about devices selected.
-            path = parse.urlsplit(self.path)
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length).decode('utf-8')
-            # Set of devices reference
-            form_data = parse.parse_qs(body)
-            session = self.cookies[self.headers['Cookie']]
-            code = super().create_bearer_token(devices=form_data, user_id=session['user_id'])
-            # Redirect authorization code
-            return self._redirect_code(session['redirect_uri'], code=code, state=session['state'])
+            # Parse device type info
+            devices = dict(devices=list(query.keys()))
+            code = super().create_bearer_token(devices=devices,
+                                               user_id=user_id)
+
+            self._redirect_code(redirect_uri, code=code, state=state)
+        else:
+            self.send_error(HTTPStatus.BAD_REQUEST)
 
     def _authorize_code_request(self, params):
         # Params to authorize
@@ -141,7 +152,10 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         else:
             return True
 
-    def _authorize_token_request(self, **params):
+    def _authorize_token_request(self, params):
+        # 1. Basic Authentication
+        # 2. Params.
+        print(params)
         pass
 
     def _authorize_basic_header(self):
@@ -161,7 +175,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
 
     def _redirect_code(self, url, **params):
         qs = parse.urlencode(params)
-        self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
+        self.send_response(HTTPStatus.MOVED_PERMANENTLY)
         self.send_header('Location', f'{url}?{qs}')
         self.end_headers()
 
