@@ -47,6 +47,7 @@ class UserInformation():
         return new.user_id
 
     def create_bearer_token(self, **data):
+        import secrets
         # Create BearerToken instance.
         # Returns __dict__ of class instance
         # with JWT tokens.
@@ -58,7 +59,7 @@ class UserInformation():
         acc_token = jwt.encode(access_jwt_data, SECRET, algorithm=ALGORITHM).decode('utf-8')
         ref_token = jwt.encode(refresh_jwt_data, SECRET, algorithm=ALGORITHM).decode('utf-8')
         expires_in = 3600
-        code = md5(CLIENT_ID.encode('utf-8')).hexdigest()
+        code = secrets.token_hex(20)
         # BearerToken instance
         bearer_token = BearerToken(access_token=acc_token,
                                    refresh_token=ref_token,
@@ -88,10 +89,13 @@ class UserInformation():
         _file.close()
         logging.info('bearer token saved.')
 
-    def get_access_token(self, code: str) -> dict:
+    def get_access_token(self, code: str) -> dict: # FIXME: Revoke code
         # Return tokens exchange for
         # POST Http Request at /token.
-        pass
+        with open(self.basedir + self.user_info_path, 'rb') as _file:
+            info = pickle.load(_file)
+            user_info = list(filter(lambda user: user['bearer_token']['code'] == code[0], info))
+        return user_info[0]['bearer_token']
 
     def refresh_token(self, refresh_token: str) -> dict:
         # Refresh user tokens.

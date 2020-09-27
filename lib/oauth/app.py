@@ -26,52 +26,47 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
     at SmartThings to integrate Third-party
     Clouds.
 
-    After client authorization, this
-    client offers two views:
-        - Login
-        - Device selection
-
-    The Device selection view offers a
-    predefined list of devices that will
-    be sent as Access Token and decoded
-    by the SchemaConnector instance
-    implemented at the lib.webhook module.
+    Once GET Http Request for code has
+    been authorized, LOGIN view will be
+    exposed with a list of test devices
+    to select.
     """
     protocol_version=HTTP_VERSION
     cookies = {}
 
     def do_GET(self):
         # GET Http Request handler
-        path = parse.urlsplit(self.path).path
+        path = parse.urlsplit(self.path)
         # Handle path
-        if path in _PUBLIC_PATH:
-            # Handle public
+        if path.path in _PUBLIC_PATH:
+            # Handle request for public
+            # resource.
             return self._handle_public_request(path)
-        elif path in _PRIVATE_PATH:
-            # Handle private
+        elif path.path in _PRIVATE_PATH:
+            # Handle request for private
+            # resource.
             return self._handle_private_request(path)
         else:
             return self.send_error(HTTPStatus.BAD_REQUEST)
 
     def do_POST(self):
         # POST Http Request handler
-        path = parse.urlsplit(self.path).path
+        path = parse.urlsplit(self.path)
         # Handle path
-        if path in _PUBLIC_PATH:
+        if path.path in _PUBLIC_PATH:
             return self._handle_public_request(path)
-        elif path in _PRIVATE_PATH:
+        elif path.path in _PRIVATE_PATH:
             return self._handle_private_request(path)
 
     def _handle_private_request(self, path):
         # Private request handler:
         #   - Code GET Http Request
         #   - Token POST Http Request
-        path = parse.urlsplit(self.path)
         if path.path == AUTHORIZE_ENDPOINT:
             # Move along with authorization process.
             query = parse.parse_qs(path.query)
             if self._authorize_code_request(query):
-                # If request authorized,
+                # If request has state,
                 # persist session.
                 if query.get('state'):
                     state = query['state'][0]
@@ -84,20 +79,23 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             # Move along with token request
             # authorization.
             content_length = int(self.headers['Content-Length'])
-            req_body = self.rfile.read(content_length).decode('utf-8')
-            query = parse.parse_qs(req_body)
+            body = self.rfile.read(content_length).decode('utf-8')
+            params = parse.parse_qs(body)
 
-            # Check Authorization Headers
-            if not self.headers.get('Authorization'):
-                self.send_error(HTTPStatus.UNAUTHORIZED)
-            elif self._authorize_token_request(query):
-                pass
+            if self._authorize_token_request(params):
+                grant_type = params.get('grant_type')[0]
+                if grant_type == 'authorization_code':
+                    # Return access token
+                    code = params.get('code')
+                    access_token = super().get_access_token(code)
+                    return self._send_access_token(access_token)
+                elif grant_type == 'refresh_token':
+                    pass
 
     def _handle_public_request(self, path):
         # Public Request handler:
         #   - POST /login
-        #   - POST /login/devices
-        if path == LOGIN_ENDPOINT:
+        if path.path == LOGIN_ENDPOINT:
             # Collect Http Request
             # information.
             content_length = int(self.headers['Content-Length'])
@@ -131,8 +129,6 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
                                                user_id=user_id)
 
             self._redirect_code(redirect_uri, code=code, state=state)
-        else:
-            self.send_error(HTTPStatus.BAD_REQUEST)
 
     def _authorize_code_request(self, params):
         # Params to authorize
@@ -153,14 +149,45 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             return True
 
     def _authorize_token_request(self, params):
-        # 1. Basic Authentication
-        # 2. Params.
-        print(params)
-        pass
+        # Params
+        auth_header = self.headers.get('Authorization')
+        client_id = params.get('client_id')
+        client_secret = params.get('client_secret')
+        redirect_uri = None if not params.get('redirect_uri') else params['redirect_uri'][0]
+        code = params.get('code')
+        # Authorization steps.
+        if not auth_header:
+            # Unauthorize requests with no Basic Auth Header
+            self.send_error(HTTPStatus.UNAUTHORIZED)
+        # Basic Authorization Header check
+        if self._authorize_basic_header(auth_header):
+            if client_id != [CLIENT_ID]:
+                # Client Id check
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+            elif client_secret != [CLIENT_SECRET]:
+                # Client Secret check
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+            elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(','):
+                # Redrect URI check
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+                    # Code check
+            elif not code:
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+            else:
+                return True
 
-    def _authorize_basic_header(self):
-        cred = self.headers.get('Authorization')
-        pass
+    def _authorize_basic_header(self, basic_cred):
+        import base64
+        # Encode mock credentials to
+        # compare Basic Auth Header.
+        app_cred = f'{CLIENT_ID}:{CLIENT_SECRET}'.encode('utf-8')
+        encoded_cred = base64.b64encode(app_cred).decode('utf-8')
+
+        # Basic Authorization header validation
+        if basic_cred.lstrip('Basic ') != encoded_cred:
+            return False
+        else:
+            return True
 
     def _send_public_file(self, public_file, cookie=None):
         # Send response
@@ -178,6 +205,16 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         self.send_response(HTTPStatus.MOVED_PERMANENTLY)
         self.send_header('Location', f'{url}?{qs}')
         self.end_headers()
+
+    def _send_access_token(self, token_data):
+        import json
+        encoded_token = json.dumps(token_data).encode('utf-8')
+        # Response headers
+        self.send_response(HTTPStatus.OK)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', int(len(encoded_token)))
+        self.end_headers()
+        self.wfile.write(encoded_token)
 
     def _set_cookie(self, **params):
         encode_data = {k: v for k, v in params.items()}
