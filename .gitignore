@@ -135,6 +135,3 @@ dmypy.json
 
 #IDE
 .vscode/
-
-# local db
-schema_connector_db.sqlite
