@@ -19,6 +19,7 @@ cli_parser = argparse.ArgumentParser()
 cli_parser.add_argument('-s', '--service')
 arg = cli_parser.parse_args()
 
+
 # APP INIT
 if __name__ == "__main__":
     if arg.service == OAUTH_SERVICE:

@@ -12,8 +12,7 @@ AUTHORIZE_ENDPOINT='/authorize'
 TOKEN_ENDPOINT='/token'
 CLIENT_ID='my-oauth2.0-instance-client-id'
 CLIENT_SECRET='my-oauth2.0-instance-client-secret'
-# REDIRECT_URI='https://c2c-us.smartthings.com/oauth/callback,https://c2c-eu.smartthings.com/oauth/callback,https://c2c-ap.smartthings.com/oauth/callback'
-REDIRECT_URI='https://c2c-us.smartthings.com/oauth/callback,https://c2c-eu.smartthings.com/oauth/callback,https://c2c-ap.smartthings.com/oauth/callback,https://envlmexvda5l.x.pipedream.net/'
+REDIRECT_URI='https://c2c-us.smartthings.com/oauth/callback,https://c2c-eu.smartthings.com/oauth/callback,https://c2c-ap.smartthings.com/oauth/callback'
 RESPONSE_TYPE='code'
 
 # JWT INFO & DATA INFO
