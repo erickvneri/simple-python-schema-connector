@@ -1,4 +1,30 @@
+"""
+This example OAuth2.0 Client follows
+the Code Flow described at the RFC 6749
+which is the Authorization protocol
+currently supported at SmartThings to
+integrate third-party services
+
+About the client flow:
+  Once the <authorize> HTTP Request
+  has been authorized, a login page
+  will be deployed along with a list of
+  test devices to select.
+  The device selection will be hashed
+  into a JSON Web Token to generate the
+  <access token> that the Schema Connector
+  instance will decode to send device info
+  accordingly to the SmartThings app.
+
+About session persistence:
+  This client uses a cookie dict to persist
+  the <state> and <redirect URI> values
+  received from SmartThings to redirect
+  code successfully once login flow has
+  finished.
+"""
 import json
+import base64
 from urllib import parse
 from hashlib import md5
 from http import HTTPStatus
@@ -30,19 +56,6 @@ _PRIVATE_PATH = [
 
 
 class OAuth2(BaseHTTPRequestHandler, UserInformation):
-    """
-    This example OAuth2.0 client follows
-    the Code Flow principle described
-    by the RFC 6749 which is the the
-    Authorization flow currently supported
-    at SmartThings to integrate Third-party
-    Clouds as ST Schema Integrations.
-
-    Once GET Http Request for code has
-    been authorized, LOGIN view will be
-    exposed with a list of test devices
-    to select.
-    """
 
     protocol_version = HTTP_VERSION
     cookies = {}
@@ -101,15 +114,24 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             body = self.rfile.read(content_length).decode("utf-8")
             params = parse.parse_qs(body)
 
-            if self._authorize_token_request(params):
-                grant_type = params.get("grant_type")[0]
-                if grant_type == "authorization_code":
-                    # Return access token
-                    code = params.get("code")
-                    access_token = super().get_access_token(code)
-                    self._send_access_token(access_token)
-                elif grant_type == "refresh_token":
-                    pass
+            grant_type = params.get("grant_type")
+            if not grant_type:
+                self.send_error(HTTPStatus.BAD_REQUEST)
+            else:
+                if self._authorize_token_request(grant_type[0], params):
+                    access_token = None
+                    if grant_type[0] == "authorization_code":
+                        # Return access token
+                        code = params.get("code")[0]
+                        access_token = super().get_access_token(code)
+                    elif grant_type[0] == "refresh_token":
+                        refresh_token = params.get('refresh_token')[0]
+                        access_token = super().refresh_token(refresh_token)
+                    # Invalid code error
+                    if not access_token:
+                        self.send_error(HTTPStatus.UNAUTHORIZED)
+                    else:
+                        self._send_access_token(access_token)
 
     def _handle_public_request(self, path):
         # Public Request handler:
@@ -135,15 +157,11 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             # have a valid third-party account
             # to integrate devices into
             # third-parties.
-            user_id = super().grant_user_access(user_email, user_pass)
-            # Update current cookie to
-            # track user bearer token at
-            # Token Request.
-            self._update_cookie(cookie, user_id=user_id)
+            super().grant_user_access(user_email, user_pass)
 
             # Parse device type info
             devices = dict(devices=list(query.keys()))
-            code = super().create_bearer_token(devices=devices, user_id=user_id)
+            code = super().create_bearer_token(devices=devices)
 
             self._redirect_code(redirect_uri, code=code, state=state)
 
@@ -151,9 +169,8 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Params to authorize
         response_type = params.get("response_type")
         client_id = params.get("client_id")
-        redirect_uri = (
-            None if not params.get("redirect_uri") else params["redirect_uri"][0]
-        )
+        redirect_uri = None if not params.get("redirect_uri") else params["redirect_uri"][0]
+
         # OAuth2.0 flow
         if response_type != [RESPONSE_TYPE]:
             # Response type check
@@ -167,7 +184,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         else:
             return True
 
-    def _authorize_token_request(self, params):
+    def _authorize_token_request(self, grant_type, params):
         # Params
         auth_header = self.headers.get("Authorization")
         client_id = params.get("client_id")
@@ -175,7 +192,6 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         redirect_uri = (
             None if not params.get("redirect_uri") else params["redirect_uri"][0]
         )
-        code = params.get("code")
         # Authorization steps.
         if not auth_header:
             # Unauthorize requests with no Basic Auth Header
@@ -191,16 +207,20 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(","):
                 # Redrect URI check
                 self.send_error(HTTPStatus.UNAUTHORIZED)
-                # Code check
-            elif not code:
-                self.send_error(HTTPStatus.UNAUTHORIZED)
-            else:
-                return True
+            # Specific grant type params
+            if grant_type == 'authorization_code':
+                code = params.get("code")
+                if not code:
+                    # Code check
+                    self.send_error(HTTPStatus.UNAUTHORIZED)
+            elif grant_type == 'refresh_token':  # FIXME: DEBUG 401 RESPONSE
+                refresh_token = params.get('refresh_token')
+                if not refresh_token:
+                    self.send_error(HTTPStatus.UNAUTHORIZED)
+            return True
 
     @staticmethod
     def _authorize_basic_header(basic_cred):
-        import base64
-
         # Encode mock credentials to
         # compare Basic Auth Header.
         app_cred = f"{CLIENT_ID}:{CLIENT_SECRET}".encode("utf-8")
@@ -209,8 +229,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Basic Authorization header validation
         if basic_cred.lstrip("Basic ") != encoded_cred:
             return False
-        else:
-            return True
+        return True
 
     def _send_public_file(self, public_file, cookie=None):
         # Send response
