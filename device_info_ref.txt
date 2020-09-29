@@ -33,9 +33,9 @@
 #     },
 #     {
 #         'unique_id': 'x004',
-#         'label': 'doorbell_example',
-#         'device_handler': 'c2c-doorbell',
-#         'device_type': 'Doorbell',
+#         'label': 'air_conditioner_example',
+#         'device_handler': '577c8d5e-8cc9-4c4b-b3d5-cd8c1f632697',
+#         'device_type': 'Air Conditioner',
 #         'mn': {
 #             'mn': 'mock manufacturer',
 #             'model': '0.0.1'

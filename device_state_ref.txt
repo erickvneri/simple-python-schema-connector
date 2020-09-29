@@ -62,27 +62,28 @@ device_state_info = [
         'states': [
             {
                 'component': 'main',
-                'capability': 'st.button',
-                'attribute': 'numberOfButtons',
-                'value': 1
+                'capability': 'st.switch',
+                'attribute': 'switch',
+                'value': 'on'
             },
             {
                 'component': 'main',
-                'capability': 'st.button',
-                'attribute': 'button',
-                'value': 'pressed'
+                'capability': 'st.healthCheck',
+                'attribute': 'healthStatus',
+                'value': 'online'
             },
             {
                 'component': 'main',
-                'capability': 'st.motionSensor',
-                'attribute': 'motion',
-                'value': 'active'
+                'capability': 'st.thermostatMode',
+                'attribute': 'thermostatMode',
+                'value': 'auto'
             },
             {
                 'component': 'main',
-                'capability': 'st.battery',
-                'attribute': 'battery',
-                'value': 98
+                'capability': 'st.thermostatCoolingSetpoint',
+                'attribute': 'coolingSetpoint',
+                'value': 16,
+                'unit': 'C'
             }
         ]
     },
