@@ -149,7 +149,7 @@ class UserInformation:
         _file = open(file_path, "wb")
         pickle.dump(info, _file)
         _file.close()
-        logging.info("OAuth code revoked successfully.")
+        logging.info("OAuth code revoked after token exchange.")
 
     def _save_user_record(self, user_data) -> None:
         # Read file step
