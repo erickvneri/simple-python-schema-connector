@@ -13,9 +13,9 @@
 #     },
 #     {
 #         'unique_id': 'x002',
-#         'label': 'presence_sensor_example',
-#         'device_handler': 'c2c-arrival',
-#         'device_type': 'Presence Sensor',
+#         'label': 'air_conditioner_example',
+#         'device_handler': '577c8d5e-8cc9-4c4b-b3d5-cd8c1f632697',
+#         'device_type': 'Air Conditioner',
 #         'mn': {
 #             'mn': 'mock manufacturer',
 #             'model': '0.0.1'
@@ -23,9 +23,9 @@
 #     },
 #     {
 #         'unique_id': 'x003',
-#         'label': 'contact_sensor_example',
-#         'device_handler': 'c2c-contact',
-#         'device_type': 'Contact Sensor',
+#         'label': 'thermostat_example',
+#         'device_handler': 'fe75655a-b1e2-475c-8878-d0f3882bf14b',
+#         'device_type': 'Thermostat',
 #         'mn': {
 #             'mn': 'mock manufacturer',
 #             'model': '0.0.1'
@@ -33,9 +33,9 @@
 #     },
 #     {
 #         'unique_id': 'x004',
-#         'label': 'air_conditioner_example',
-#         'device_handler': '577c8d5e-8cc9-4c4b-b3d5-cd8c1f632697',
-#         'device_type': 'Air Conditioner',
+#         'label': 'contact_sensor_example',
+#         'device_handler': 'c2c-contact',
+#         'device_type': 'Contact Sensor',
 #         'mn': {
 #             'mn': 'mock manufacturer',
 #             'model': '0.0.1'
@@ -94,7 +94,7 @@
 #     {
 #         'unique_id': 'x010',
 #         'label': 'valve_example',
-#         'device_handler': 'c2c-valve',
+#         'device_handler': '7faaccf1-304b-45e9-8e81-e1b1470c4b73',
 #         'device_type': 'Valve',
 #         'mn': {
 #             'mn': 'mock manufacturer',

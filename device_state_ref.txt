@@ -21,47 +21,6 @@ device_state_info = [
         'states': [
             {
                 'component': 'main',
-                'capability': 'st.presenceSensor',
-                'attribute': 'presense',
-                'value': 'present'
-            },
-            {
-                'component': 'main',
-                'capability': 'st.battery',
-                'attribute': 'battery',
-                'value': 89
-            }
-        ]
-    },
-    {
-        'unique_id': 'x003',
-        'states': [
-            {
-                'component': 'main',
-                'capability': 'st.contactSensor',
-                'attribute': 'contact',
-                'value': 'open'
-            },
-            {
-                'component': 'main',
-                'capability': 'st.temperatureMeasurement',
-                'attribute': 'temperature',
-                'value': 23,
-                'unit': 'C'
-            },
-            {
-                'component': 'main',
-                'capability': 'st.battery',
-                'attribute': 'battery',
-                'value': 76
-            }
-        ]
-    },
-    {
-        'unique_id': 'x004',
-        'states': [
-            {
-                'component': 'main',
                 'capability': 'st.switch',
                 'attribute': 'switch',
                 'value': 'on'
@@ -84,6 +43,55 @@ device_state_info = [
                 'attribute': 'coolingSetpoint',
                 'value': 16,
                 'unit': 'C'
+            }
+        ]
+    },
+    {
+        'unique_id': 'x003',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.healthCheck',
+                'attribute': 'healthStatus',
+                'value': 'online'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.thermostatCoolingSetpoint',
+                'attribute': 'coolingSetpoint',
+                'value': 16,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.thermostatHeatingSetpoint',
+                'attribute': 'heatingSetpoint',
+                'value': 23,
+                'unit': 'C'
+            }
+        ]
+    },
+    {
+        'unique_id': 'x004',
+        'states': [
+            {
+                'component': 'main',
+                'capability': 'st.contactSensor',
+                'attribute': 'contact',
+                'value': 'open'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.temperatureMeasurement',
+                'attribute': 'temperature',
+                'value': 23,
+                'unit': 'C'
+            },
+            {
+                'component': 'main',
+                'capability': 'st.battery',
+                'attribute': 'battery',
+                'value': 76
             }
         ]
     },
@@ -220,9 +228,9 @@ device_state_info = [
             },
             {
                 'component': 'main',
-                'capability': 'st.switch',
-                'attribute': 'switch',
-                'value': 'on',
+                'capability': 'st.healthCheck',
+                'attribute': 'healthStatus',
+                'value': 'online',
             }
         ]
     }
