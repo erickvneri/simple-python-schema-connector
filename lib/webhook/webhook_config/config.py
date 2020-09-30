@@ -1,3 +1,4 @@
+# APP CONFIG
 WEBHOOK_ENDPOINT='/my-schema-connector'
 ENCODING='utf-8'
 PORT=8000
@@ -5,10 +6,6 @@ ADDRESS='127.0.0.1'
 DEVICE_INFO_PATH='/device_info.p'
 DEVICE_STATE_PATH='/device_state_info.p'
 
-# DEVICE HANDLER TYPES
-AIR_CONDITIONER='577c8d5e-8cc9-4c4b-b3d5-cd8c1f632697'
-DIMMER_SWITCH='c2c-dimmer'
-WATER_VALVE=''
-WINDOW_SHADE=''
-THERMOSTAT=''
-WATER_SENSOR=''
+# JWT CONFIG
+SECRET='my-schema-connector-webhook'
+ALGORITHM='HS256'

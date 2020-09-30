@@ -16,25 +16,18 @@ class DeviceInformation():
         - Get state of many devices.
         - Update device state.
     """
-    def __init__(self):
-        self.basedir = os.path.abspath(os.path.dirname(__file__))
-        self.device_info_path = DEVICE_INFO_PATH
-        self.device_state_path = DEVICE_STATE_PATH
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    device_info_path = DEVICE_INFO_PATH
+    device_state_path = DEVICE_STATE_PATH
 
-    def get_all(self):
-        # Read data step
-        with open(self.basedir + self.device_info_path, 'rb') as info:
-            info = pickle.load(info)
-        return info
-
-    def get_many(self, unique_ids: list) -> list:
+    def get_device_info(self, device_types: list) -> list:
         # Read data step
         with open(self.basedir + self.device_info_path, 'rb') as info:
             info = pickle.load(info)
 
         # Filter step
-        filter_many = list(filter(lambda n: n['unique_id'] in unique_ids, info))
-        return filter_many
+        devices = list(filter(lambda device: device['device_type'] in device_types, info))
+        return devices
 
     def get_states(self, unique_ids: list) -> list:
         # Read state data step
@@ -42,8 +35,8 @@ class DeviceInformation():
             info = pickle.load(info)
 
         # Filter step
-        filter_many = list(filter(lambda n: n['unique_id'] in unique_ids, info))
-        return filter_many
+        devices = list(filter(lambda n: n['unique_id'] in unique_ids, info))
+        return devices
 
     def update_state(self, unique_id: str, state: dict) -> list:
         # Read state data step
