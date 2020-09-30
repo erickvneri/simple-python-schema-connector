@@ -17,7 +17,7 @@ RESPONSE_TYPE='code'
 
 # JWT INFO & DATA INFO
 SECRET='my-schema-connector-webhook'
-USER_INFO_PATH='/user_info.b'
+USER_INFO_PATH='/user_info.p'
 ALGORITHM='HS256'
 TOKEN_TYPE='Bearer'
 
