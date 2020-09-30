@@ -121,10 +121,16 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
                 if self._authorize_token_request(grant_type[0], params):
                     access_token = None
                     if grant_type[0] == "authorization_code":
-                        # Return access token
+                        # Retrieve access token from code
+                        from pprint import pprint
+                        pprint('Code - token request:\n %s' % params)
                         code = params.get("code")[0]
                         access_token = super().get_access_token(code)
                     elif grant_type[0] == "refresh_token":
+                        from pprint import pprint
+                        # Retrieve access token from refresh token
+                        print(self.headers)
+                        pprint('Refresh token request:\n %s' % params)
                         refresh_token = params.get('refresh_token')[0]
                         access_token = super().refresh_token(refresh_token)
                     # Invalid code error
@@ -189,10 +195,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         auth_header = self.headers.get("Authorization")
         client_id = params.get("client_id")
         client_secret = params.get("client_secret")
-        redirect_uri = (
-            None if not params.get("redirect_uri") else params["redirect_uri"][0]
-        )
-        # Authorization steps.
+        # Credential authorization step.
         if not auth_header:
             # Unauthorize requests with no Basic Auth Header
             self.send_error(HTTPStatus.UNAUTHORIZED)
@@ -204,14 +207,16 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             elif client_secret != [CLIENT_SECRET]:
                 # Client Secret check
                 self.send_error(HTTPStatus.UNAUTHORIZED)
-            elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(","):
-                # Redrect URI check
-                self.send_error(HTTPStatus.UNAUTHORIZED)
-            # Specific grant type params
+
+            # Grant type-specific authorization
             if grant_type == 'authorization_code':
                 code = params.get("code")
+                redirect_uri = None if not params.get("redirect_uri") else params["redirect_uri"][0]
                 if not code:
                     # Code check
+                    self.send_error(HTTPStatus.UNAUTHORIZED)
+                elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(","):
+                    # Redrect URI check
                     self.send_error(HTTPStatus.UNAUTHORIZED)
             elif grant_type == 'refresh_token':  # FIXME: DEBUG 401 RESPONSE
                 refresh_token = params.get('refresh_token')
