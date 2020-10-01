@@ -6,7 +6,7 @@ binary form using the pickle built-in
 module.
 
 In addition, to avoid massive data
-storage, the <user_info.b> file
+storage, the <user_info.p> file
 will store only one record, therefore,
 data will be overwritten at every
 login attempt, e.g.:

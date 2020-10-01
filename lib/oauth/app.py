@@ -122,15 +122,10 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
                     access_token = None
                     if grant_type[0] == "authorization_code":
                         # Retrieve access token from code
-                        from pprint import pprint
-                        pprint('Code - token request:\n %s' % params)
                         code = params.get("code")[0]
                         access_token = super().get_access_token(code)
                     elif grant_type[0] == "refresh_token":
-                        from pprint import pprint
                         # Retrieve access token from refresh token
-                        print(self.headers)
-                        pprint('Refresh token request:\n %s' % params)
                         refresh_token = params.get('refresh_token')[0]
                         access_token = super().refresh_token(refresh_token)
                     # Invalid code error
