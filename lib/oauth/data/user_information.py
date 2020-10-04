@@ -11,9 +11,9 @@ will store only one record, therefore,
 data will be overwritten at every
 login attempt, e.g.:
   [{
-      "email": ...,
-      "password"...,
-      "bearer_token": {...},
+      'email': ...,
+      'password'...,
+      'bearer_token': {...},
   }].
 """
 from datetime import datetime
@@ -31,7 +31,7 @@ from lib.oauth.oauth_config import (
 
 
 # LOGGING CONFIG
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 class User:
@@ -56,12 +56,12 @@ class UserInformation:
         # with JWT tokens.
         #
         # Data to encode
-        access_jwt_data = data.get("devices")
+        access_jwt_data = data.get('devices')
         access_jwt_data['timestamp'] = str(datetime.now())
         refresh_jwt_data = dict(timestamp=str(datetime.now()))
         # Create JSON Web Tokens
-        acc_token = jwt.encode(access_jwt_data, SECRET, ALGORITHM).decode("utf-8")
-        ref_token = jwt.encode(refresh_jwt_data, SECRET, ALGORITHM).decode("utf-8")
+        acc_token = jwt.encode(access_jwt_data, SECRET, ALGORITHM).decode('utf-8')
+        ref_token = jwt.encode(refresh_jwt_data, SECRET, ALGORITHM).decode('utf-8')
         expires_in = 3600
         code = secrets.token_hex(20)
         # BearerToken dictionary
@@ -76,34 +76,34 @@ class UserInformation:
         # set of JWT Tokens.
         self._save_bearer_token(bearer_token=bearer_token)
 
-        logging.info("authorization code generated.")
+        logging.info('authorization code generated.')
         return code
 
     def _save_bearer_token(self, **data) -> None:
         file_path = self.basedir + self.user_info_path
         # Read and update record.
-        _file = open(file_path, "rb")
+        _file = open(file_path, 'rb')
         info = pickle.load(_file)
-        info[0]["bearer_token"] = data["bearer_token"]
+        info[0]['bearer_token'] = data['bearer_token']
 
         # Write changes.
-        _file = open(file_path, "wb")
+        _file = open(file_path, 'wb')
         pickle.dump(info, _file)
         _file.close()
-        logging.info("bearer token saved.")
+        logging.info('bearer token saved.')
 
     def get_access_token(self, code: str) -> dict:
         # Return tokens exchange for
         # POST Http Request at /token.
-        with open(self.basedir + self.user_info_path, "rb") as _file:
+        with open(self.basedir + self.user_info_path, 'rb') as _file:
             info = pickle.load(_file)
             # Validate code
             if not code == info[0]['bearer_token']['code']:
                 return None
             # Return bearer token
-            info[0]["bearer_token"].pop("code")
+            info[0]['bearer_token'].pop('code')
             self._revoke_oauth_code()
-        return info[0]["bearer_token"]
+        return info[0]['bearer_token']
 
     def refresh_token(self, refresh_token: str) -> dict:
         # Refresh user tokens.
@@ -125,7 +125,7 @@ class UserInformation:
 
         # Redefine tokens
         token_data['access_token'] = jwt.encode(acc_token_data, SECRET, ALGORITHM).decode('utf-8')
-        token_data['refresh_token'] = jwt.encode(ref_token_data, SECRET, ALGORITHM).decode("utf-8")
+        token_data['refresh_token'] = jwt.encode(ref_token_data, SECRET, ALGORITHM).decode('utf-8')
 
         # Update file.
         _file = open(file_path, 'wb')
@@ -142,24 +142,24 @@ class UserInformation:
         #
         # Read and set to None current code
         file_path = self.basedir + self.user_info_path
-        _file = open(file_path, "rb")
+        _file = open(file_path, 'rb')
         info = pickle.load(_file)
-        info[0]["bearer_token"]["code"] = None
+        info[0]['bearer_token']['code'] = None
         # Update values
-        _file = open(file_path, "wb")
+        _file = open(file_path, 'wb')
         pickle.dump(info, _file)
         _file.close()
-        logging.info("OAuth code revoked after token exchange.")
+        logging.info('OAuth code revoked after token exchange.')
 
     def _save_user_record(self, user_data) -> None:
         # Read file step
         file_path = self.basedir + self.user_info_path
         try:
-            _file = open(file_path, "rb")
+            _file = open(file_path, 'rb')
             info = pickle.load(_file)
         except (EOFError, FileNotFoundError):
             # When file is empty or doesn't exists.
-            _file = open(file_path, "wb")
+            _file = open(file_path, 'wb')
             pickle.dump([], _file)
             _file.close()
             return self._save_user_record(user_data)
@@ -167,7 +167,7 @@ class UserInformation:
             info = []
             info.append(user_data)
             # Write data.
-            _file = open(file_path, "wb")
+            _file = open(file_path, 'wb')
             pickle.dump(info, _file)
             _file.close()
-            logging.info("new user information stored")
+            logging.info('new user information stored')

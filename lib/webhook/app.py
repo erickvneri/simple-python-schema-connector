@@ -7,7 +7,6 @@ from http.server import BaseHTTPRequestHandler
 from lib.webhook.my_connector import MyConnector
 from lib.webhook.webhook_config import (ADDRESS,
                                         PORT,
-                                        ENCODING,
                                         WEBHOOK_ENDPOINT)
 
 
@@ -19,7 +18,7 @@ class Webhook(BaseHTTPRequestHandler):
             self.send_error(HTTPStatus.BAD_REQUEST)
 
         content_length = int(self.headers['Content-Length'])
-        req_body = self.rfile.read(content_length).decode(ENCODING)
+        req_body = self.rfile.read(content_length).decode('utf-8')
         # Parse JSON string
         json_data = json.loads(req_body)
         self._authorize_request(json_data)
@@ -42,11 +41,6 @@ class Webhook(BaseHTTPRequestHandler):
                 # to the SchemaConnector instance.
                 self._schema_connector_route(json_data)
 
-    def _authorize_bearer_token(self):
-        # Authorize Bearer Token
-        # with OAuth Instance.
-        raise NotImplementedError('Not implemented yet.')
-
     def _schema_connector_route(self, json_data):
         # Call to interacion_handler from
         # SchemaConnector Instance.
@@ -60,5 +54,5 @@ class Webhook(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
         # Http Response body config
-        json_response = json.dumps(json_data).encode(ENCODING)
+        json_response = json.dumps(json_data).encode('utf-8')
         self.wfile.write(json_response)

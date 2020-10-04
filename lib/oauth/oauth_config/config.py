@@ -1,27 +1,31 @@
 import os
+import dotenv
+
+# LOAD ENVIRONMENT VARIABLES
+dotenv.load_dotenv()
 
 # PUBLIC FILES
-LOGIN_ENDPOINT='/login'
+LOGIN_ENDPOINT=os.getenv('LOGIN_ENDPOINT')
 # HTML FILES PRELOAD
 public_files_path = os.path.abspath(os.path.dirname(__file__) + '/../public')
 with open(public_files_path + '/login.html') as view:
     LOGIN_PAGE=view.read().encode('utf-8')
 
 # PRIVATE FILES
-AUTHORIZE_ENDPOINT='/authorize'
-TOKEN_ENDPOINT='/token'
-CLIENT_ID='my-oauth2.0-instance-client-id'
-CLIENT_SECRET='my-oauth2.0-instance-client-secret'
-REDIRECT_URI='https://c2c-us.smartthings.com/oauth/callback,https://c2c-eu.smartthings.com/oauth/callback,https://c2c-ap.smartthings.com/oauth/callback'
-RESPONSE_TYPE='code'
+AUTHORIZE_ENDPOINT=os.getenv('AUTHORIZE_ENDPOINT')
+TOKEN_ENDPOINT=os.getenv('TOKEN_ENDPOINT')
+CLIENT_ID=os.getenv('CLIENT_ID')
+CLIENT_SECRET=os.getenv('CLIENT_SECRET')
+REDIRECT_URI=os.getenv('REDIRECT_URI')
+RESPONSE_TYPE=os.getenv('RESPONSE_TYPE')
 
 # JWT INFO & DATA INFO
-SECRET='my-schema-connector-webhook'
-USER_INFO_PATH='/user_info.p'
-ALGORITHM='HS256'
-TOKEN_TYPE='Bearer'
+SECRET=os.getenv('SECRET')
+USER_INFO_PATH=os.getenv('USER_INFO_PATH')
+ALGORITHM=os.getenv('ALGORITHM')
+TOKEN_TYPE=os.getenv('TOKEN_TYPE')
 
 # APP CONFIG
-ADDRESS='127.0.0.1'
-PORT=5000
-HTTP_VERSION='HTTP/1.1'
+ADDRESS=os.getenv('OAUTH_ADDRESS')
+PORT=int(os.getenv('OAUTH_PORT'))
+HTTP_VERSION=os.getenv('HTTP_VERSION')

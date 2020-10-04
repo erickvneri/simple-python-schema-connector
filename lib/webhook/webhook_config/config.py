@@ -1,11 +1,16 @@
+import os
+import dotenv
+
+# LOAD ENVIRONMENT VARIABLES
+dotenv.load_dotenv()
+
 # APP CONFIG
-WEBHOOK_ENDPOINT='/my-schema-connector'
-ENCODING='utf-8'
-PORT=8000
-ADDRESS='127.0.0.1'
-DEVICE_INFO_PATH='/device_info.p'
-DEVICE_STATE_PATH='/device_state_info.p'
+ADDRESS=os.getenv('WEBHOOK_ADDRESS')
+PORT=int(os.getenv('WEBHOOK_PORT'))
+WEBHOOK_ENDPOINT=os.getenv('WEBHOOK_ENDPOINT')
+DEVICE_INFO_PATH=os.getenv('DEVICE_INFO_PATH')
+DEVICE_STATE_PATH=os.getenv('DEVICE_STATE_PATH')
 
 # JWT CONFIG
-SECRET='my-schema-connector-webhook'
-ALGORITHM='HS256'
+SECRET=os.getenv('SECRET')
+ALGORITHM=os.getenv('ALGORITHM')

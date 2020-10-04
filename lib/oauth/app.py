@@ -102,29 +102,29 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
             if self._authorize_code_request(query):
                 # If request has state,
                 # persist session.
-                if query.get("state"):
-                    state = query["state"][0]
-                    redirect_uri = query["redirect_uri"][0]
+                if query.get('state'):
+                    state = query['state'][0]
+                    redirect_uri = query['redirect_uri'][0]
                     cookie = self._set_cookie(state=state, redirect_uri=redirect_uri)
                 self._send_public_file(LOGIN_PAGE, cookie)
 
         elif path.path == TOKEN_ENDPOINT:
             # Authorization of Token Http Request.
-            content_length = int(self.headers["Content-Length"])
-            body = self.rfile.read(content_length).decode("utf-8")
+            content_length = int(self.headers['Content-Length'])
+            body = self.rfile.read(content_length).decode('utf-8')
             params = parse.parse_qs(body)
 
-            grant_type = params.get("grant_type")
+            grant_type = params.get('grant_type')
             if not grant_type:
                 self.send_error(HTTPStatus.BAD_REQUEST)
             else:
                 if self._authorize_token_request(grant_type[0], params):
                     access_token = None
-                    if grant_type[0] == "authorization_code":
+                    if grant_type[0] == 'authorization_code':
                         # Retrieve access token from code
-                        code = params.get("code")[0]
+                        code = params.get('code')[0]
                         access_token = super().get_access_token(code)
-                    elif grant_type[0] == "refresh_token":
+                    elif grant_type[0] == 'refresh_token':
                         # Retrieve access token from refresh token
                         refresh_token = params.get('refresh_token')[0]
                         access_token = super().refresh_token(refresh_token)
@@ -140,19 +140,19 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         if path.path == LOGIN_ENDPOINT:
             # Collect Http Request
             # information.
-            content_length = int(self.headers["Content-Length"])
-            req_body = self.rfile.read(content_length).decode("utf-8")
+            content_length = int(self.headers['Content-Length'])
+            req_body = self.rfile.read(content_length).decode('utf-8')
             query = parse.parse_qs(req_body)
-            cookie = self.headers.get("Cookie", None)
+            cookie = self.headers.get('Cookie', None)
             # Current session
             session = self.cookies[cookie]
-            redirect_uri = session["redirect_uri"]
-            state = session["state"]
+            redirect_uri = session['redirect_uri']
+            state = session['state']
 
             # Process user data
-            user_email = query.pop("email")[0]
-            user_pass = query.pop("password")[0]
-            user_pass = md5(user_pass.encode("utf-8")).hexdigest()
+            user_email = query.pop('email')[0]
+            user_pass = query.pop('password')[0]
+            user_pass = md5(user_pass.encode('utf-8')).hexdigest()
 
             # At this point, users should
             # have a valid third-party account
@@ -168,9 +168,9 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
 
     def _authorize_code_request(self, params):
         # Params to authorize
-        response_type = params.get("response_type")
-        client_id = params.get("client_id")
-        redirect_uri = None if not params.get("redirect_uri") else params["redirect_uri"][0]
+        response_type = params.get('response_type')
+        client_id = params.get('client_id')
+        redirect_uri = None if not params.get('redirect_uri') else params['redirect_uri'][0]
 
         # OAuth2.0 flow
         if response_type != [RESPONSE_TYPE]:
@@ -179,7 +179,7 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         elif client_id != [CLIENT_ID]:
             # Client Id check
             self.send_error(HTTPStatus.UNAUTHORIZED)
-        elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(","):
+        elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(','):
             # Redirect URI check
             self.send_error(HTTPStatus.UNAUTHORIZED)
         else:
@@ -187,9 +187,9 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
 
     def _authorize_token_request(self, grant_type, params):
         # Params
-        auth_header = self.headers.get("Authorization")
-        client_id = params.get("client_id")
-        client_secret = params.get("client_secret")
+        auth_header = self.headers.get('Authorization')
+        client_id = params.get('client_id')
+        client_secret = params.get('client_secret')
         # Credential authorization step.
         if not auth_header:
             # Unauthorize requests with no Basic Auth Header
@@ -205,12 +205,12 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
 
             # Grant type-specific authorization
             if grant_type == 'authorization_code':
-                code = params.get("code")
-                redirect_uri = None if not params.get("redirect_uri") else params["redirect_uri"][0]
+                code = params.get('code')
+                redirect_uri = None if not params.get('redirect_uri') else params['redirect_uri'][0]
                 if not code:
                     # Code check
                     self.send_error(HTTPStatus.UNAUTHORIZED)
-                elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(","):
+                elif not redirect_uri or redirect_uri not in REDIRECT_URI.split(','):
                     # Redrect URI check
                     self.send_error(HTTPStatus.UNAUTHORIZED)
             elif grant_type == 'refresh_token':  # FIXME: DEBUG 401 RESPONSE
@@ -223,11 +223,11 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
     def _authorize_basic_header(basic_cred):
         # Encode mock credentials to
         # compare Basic Auth Header.
-        app_cred = f"{CLIENT_ID}:{CLIENT_SECRET}".encode("utf-8")
-        encoded_cred = base64.b64encode(app_cred).decode("utf-8")
+        app_cred = f'{CLIENT_ID}:{CLIENT_SECRET}'.encode('utf-8')
+        encoded_cred = base64.b64encode(app_cred).decode('utf-8')
 
         # Basic Authorization header validation
-        if basic_cred.lstrip("Basic ") != encoded_cred:
+        if basic_cred.lstrip('Basic ') != encoded_cred:
             return False
         return True
 
@@ -235,33 +235,28 @@ class OAuth2(BaseHTTPRequestHandler, UserInformation):
         # Send response
         self.send_response(HTTPStatus.OK)
         # Set Http Headers
-        self.send_header("Content-Type", "text/html")
-        self.send_header("Content-Length", int(len(public_file)))
-        if cookie:
-            self.send_header("Set-Cookie", cookie)
+        self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Length', int(len(public_file)))
+        self.send_header('Set-Cookie', cookie) if cookie else None
         self.end_headers()
         self.wfile.write(public_file)
 
     def _redirect_code(self, url, **params):
         qs = parse.urlencode(params)
         self.send_response(HTTPStatus.MOVED_PERMANENTLY)
-        self.send_header("Location", f"{url}?{qs}")
+        self.send_header('Location', f'{url}?{qs}')
         self.end_headers()
 
     def _send_access_token(self, token_data):
-        encoded_token = json.dumps(token_data).encode("utf-8")
+        encoded_token = json.dumps(token_data).encode('utf-8')
         # Response headers
         self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", int(len(encoded_token)))
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', int(len(encoded_token)))
         self.end_headers()
         self.wfile.write(encoded_token)
 
     def _set_cookie(self, **params):
-        cookie = md5(str(params).encode("utf-8")).hexdigest()
+        cookie = md5(str(f'{params}').encode('utf-8')).hexdigest()
         self.cookies[cookie] = params
         return cookie
-
-    def _update_cookie(self, cookie, **params):
-        for key, value in params.items():
-            self.cookies[cookie][key] = value

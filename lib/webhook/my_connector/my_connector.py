@@ -5,7 +5,7 @@ from lib.webhook.data import DeviceInformation
 
 class MyConnector(SchemaConnector, DeviceInformation):
     def __init__(self, *opts):
-        SchemaConnector.__init__(self, enable_logger=False)
+        SchemaConnector.__init__(self, enable_logger=True)
 
     def discovery_handler(self, request_id, access_token):
         # The discovery_handler built-in method
@@ -105,11 +105,10 @@ class MyConnector(SchemaConnector, DeviceInformation):
         instance = SchemaDevice(device['unique_id'])
         for state in device['states']:
             instance.set_state(state.get('capability'),
-                                state.get('attribute'),
-                                state.get('value'),
-                                state.get('unit'),
-                                state.get('component'))
-
+                               state.get('attribute'),
+                               state.get('value'),
+                               state.get('unit'),
+                               state.get('component'))
         return instance
 
     @staticmethod

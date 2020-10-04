@@ -99,24 +99,12 @@ device_state_info = [
             },
             {
                 'component': 'main',
-                'capability': 'st.supportedWindowShadeCommands',
-                'attribute': 'windowShade',
+                'capability': 'st.windowShade',
+                'attribute': 'supportedWindowShadeCommands',
                 'value': [
                     'open',
                     'close'
                 ]
-            },
-            {
-                'component': 'main',
-                'capability': 'st.switch',
-                'attribute': 'switch',
-                'value': 'on',
-            },
-            {
-                'component': 'main',
-                'capability': 'st.switchLevel',
-                'attribute': 'level',
-                'value': 50
             }
         ]
     },

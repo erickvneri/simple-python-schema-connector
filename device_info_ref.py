@@ -71,8 +71,8 @@ device_info = [
     {
         'unique_id': 'x005',
         'label': 'window_shade_example',
-        'device_type': '38ce7e04-ab18-4680-a866-d59e63c50ef2',
-        'device_handler': 'Window Shade',
+        'device_handler': '38ce7e04-ab18-4680-a866-d59e63c50ef2',
+        'device_type': 'Window Shade',
         'mn': {
             'mn': 'mock manufacturer',
             'model': '0.0.1',
