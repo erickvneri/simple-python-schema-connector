@@ -89,7 +89,7 @@ As we did in the last step, you'll need two separate terminals to deploy both _l
 1. Access your [Developer Workspace](https://smartthings.developer.samsung.com/workspace).
 1. Create your project following this sequence of steps:
 
-    - _New Project_ -> _Device Integration_ -> _SmartThings Cloud Connector_ -> _SmartThings Schema Connector_ -> _Name your app_.
+    - _New Project_ -> _Device Integration_ -> _SmartThings Cloud Connector_ -> _SmartThings Schema Connector_ -> _Name your project_.
 
 1. Click at **Register App**.
 1. Select **Webhook Endpoint** and copy-paste the localtunnel url (**_port 8000_**) and include the `/my-schema-connector` endpoint as follows:
