@@ -1,0 +1,16 @@
+import os
+import dotenv
+
+# LOAD ENVIRONMENT VARIABLES
+dotenv.load_dotenv()
+
+# APP CONFIG
+ADDRESS=os.getenv('WEBHOOK_ADDRESS')
+PORT=int(os.getenv('WEBHOOK_PORT'))
+WEBHOOK_ENDPOINT=os.getenv('WEBHOOK_ENDPOINT')
+DEVICE_INFO_PATH=os.getenv('DEVICE_INFO_PATH')
+DEVICE_STATE_PATH=os.getenv('DEVICE_STATE_PATH')
+
+# JWT CONFIG
+SECRET=os.getenv('SECRET')
+ALGORITHM=os.getenv('ALGORITHM')

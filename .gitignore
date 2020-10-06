@@ -1,3 +1,6 @@
+# ST Schema Python SDK distribution
+st-schema-python/
+stschema/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -14,7 +17,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -109,6 +111,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.st-schema-sample/
 
 # Spyder project settings
 .spyderproject
@@ -127,3 +130,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#IDE
+.vscode/
