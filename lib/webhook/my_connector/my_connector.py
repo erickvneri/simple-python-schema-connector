@@ -5,7 +5,7 @@ from lib.webhook.data import DeviceInformation
 
 class MyConnector(SchemaConnector, DeviceInformation):
     def __init__(self, *opts):
-        SchemaConnector.__init__(self, enable_logger=True)
+        SchemaConnector.__init__(self, enable_logger=True) # Logger enabled by default
 
     def discovery_handler(self, request_id, access_token):
         # The discovery_handler built-in method
